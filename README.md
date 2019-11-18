@@ -7,10 +7,10 @@ or to associate them with slide range, for example for survey applications.
 
 ## Examples
 
-[Emoticon](https://github.com/YolfTypo3/PictorialScales/Examples/Emoticon.html)
-[BiEmoticon](https://github.com/YolfTypo3/PictorialScales/Examples/BiEmoticon.html)
-[Sun/Cloud](https://github.com/YolfTypo3/PictorialScales/Examples/SunCloud.html)
-[Arrow](https://github.com/YolfTypo3/PictorialScales/Examples/Arrow)
+[Emoticon](https://yolftypo3.github.io/PictorialScales/Examples/Emoticon.html)
+[BiEmoticon](https://yolftypo3.github.io/PictorialScales/Examples/BiEmoticon.html)
+[Sun/Cloud](https://yolftypo3.github.io/PictorialScales/Examples/SunCloud.html)
+[Arrow](https://yolftypo3.github.io/PictorialScales/Examples/Arrow)
 
 ## Configuration
 
