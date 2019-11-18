@@ -110,4 +110,4 @@ var x = new Emoticon("canvas1", "slider1", {
 
 ## License
 
-This project is licensed under the GNU Licence - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the GNU Licence - see the [LICENSE.md](LICENSE) file for details.
