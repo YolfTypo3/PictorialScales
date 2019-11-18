@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="../PictorialScales.css" media="all">
+
+<style id="slidersStyle">
+</style>
+
+</head>
+<body>
+
+	<h1>Bi-emoticon Pictorial Scale</h1>
+	
+	<div class="container">
+		<p>This example displays bi-emoticon associated with diffferent
+			input elements.</p>
+		<p>Bi-emoticons can be used to represent imprecise input values. 
+		Imprecision is represented by means of a triangular possibility distribution.
+		The triangular possibility distribution is the probability-to-possibility transformation
+		of a uniform probability distribution on the interval defined by the thumb of the slider.</p>
+		<p>The possibility distribution is used to compute a coverage interval whose level of confidence is given by the lingistic term
+		with the highest level of certainty. The left hand side part and right hand side part of the bi-emoticon
+		are respectively the half parts of the simple emoticons which would have been obtained with the lower and upper bounds of the coverage 
+		interval taken as the input.</p>
+		<ul>
+		<li>Double click on the emoticon to open or close the display of the fuzzy partition.</li>
+		<li>Click on the corners of the right hand side part of the emoticon to display the right hand side emoticon as a full single emoticon.</li>
+		<li>Click on the corners of the left hand side part of the emoticon to display the left hand side emoticon as a full single emoticon.</li>
+		<li>Click on the emoticon to recover the bi-emoticon.</li>
+		<li>Click on the right mouse button and use the mouse scroll button to modify the thumb of the slider.</li>
+		</ul>
+	</div>	
+
+	<div class="container">
+		
+		<h2>Bi-emoticon from a range slider input</h2>
+		<input type="range" min="0" max="100" value="50" class="slider"
+			id="slider1">
+		<canvas id="canvas1" width="150" height="150"></canvas>									
+	</div>
+	
+	<script src="../PictorialScales.js" type="text/javascript"></script>
+	<script>
+
+		var scales = [
+			new BiEmoticon("canvas1", "slider1"),	
+		];
+	
+		function renderAll() {
+			for (var i = 0; i < scales.length; i++) {
+				scales[i].render();
+			}
+		}
+	</script>
+
+</body>
+</html>
