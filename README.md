@@ -45,7 +45,7 @@ var x = new Emoticon("canvas4", "slider4", {
 
 ### Proptotypes
 
-The prototypes are values associated with labels. For a given label when the grade of membership of the associated membership function is equal to 1, the output value is the prototype. In the general case, the output is a linear combination of the prototypes with the grades of membership.
+The prototypes are values associated with labels. For a given label, when the grade of membership of the associated membership function is equal to 1, the output value is the prototype. In the general case, the output is a linear combination of the prototypes with the grades of membership.
  
 Example: modification of the default prototypes associated with the eyes for Emoticon.
 
