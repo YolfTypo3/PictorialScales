@@ -20,7 +20,7 @@ The fuzzy partition is an array of trapezoidal membership functions. Each member
 
 - "a" is the point below which the left hand side of the trapezoidal membership function is equal to 0.
 - "b" is the point where the left hand side of the trapezoidal membership function is equal to 1, i.e. the membership function is linearly increasing from 0 to 1 between "a" and "b".
-- "c" is the point such that between "b" and "c" the membershup function is equal to 1.
+- "c" is the point such that between "b" and "c" the membership function is equal to 1.
 - "d" is the point above which the right hand side of the trapezoidal membership function is equal to 0, i.e. the membership function is linearly decreasing from 1 to 0 between "c" and "d".
 
 Example: modification of the default partition for Emoticon.
