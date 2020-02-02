@@ -65,7 +65,7 @@ function Arrow(canvas, element, configuration) {
 	};
 
 	/**
-	 * Initializes the emoticon
+	 * Initializes the arrow
 	 */
 	this.initialize = function(userConfiguration) {
 		// Generates the configuration
@@ -74,7 +74,7 @@ function Arrow(canvas, element, configuration) {
 		return configuration.configuration;
 	}
 
-	// Initializes the emoticon and sets the configuration
+	// Initializes the arrow and sets the configuration
 	this.configuration = this.initialize(configuration);	
 
 	/**
@@ -496,7 +496,6 @@ function Emoticon(canvas, element, configuration) {
 	// Attributes
 	this.canvas = document.getElementById(canvas);
 	this.element = document.getElementById(element);
-	
 	this.fuzzy = {};
 	this.defaultConfiguration = {
 			"fuzzyPartition" : [ {
@@ -521,7 +520,17 @@ function Emoticon(canvas, element, configuration) {
 			}, {
 				"label" : "S",
 				"prototype" : [ 0, 255, 0 ]
-			} ],
+			} ],	
+			"gradientPrototypes" : [ {
+				"label" : "U",
+				"prototype" : 0
+			}, {
+				"label" : "N",
+				"prototype" : 0.3*this.canvas.height
+			}, {
+				"label" : "S",
+				"prototype" : 0.9*this.canvas.height
+			} ],				
 			"smilePrototypes" : [ {
 				"label" : "U",
 				"prototype" : -0.5
@@ -532,6 +541,16 @@ function Emoticon(canvas, element, configuration) {
 				"label" : "S",
 				"prototype" : 1
 			} ],
+			"secondSmilePrototypes" : [ {
+				"label" : "U",
+				"prototype" : -0.5
+			}, {
+				"label" : "N",
+				"prototype" : 0
+			}, {
+				"label" : "S",
+				"prototype" : 1
+			} ],			
 			"eyesSizePrototypes" : [ {
 				"label" : "U",
 				"prototype" : 1
@@ -541,15 +560,33 @@ function Emoticon(canvas, element, configuration) {
 			}, {
 				"label" : "S",
 				"prototype" : 1
-			} ],			
+			} ],	
+			"eyebrowsPrototypes" : [ {
+				"label" : "U",
+				"prototype" : 0.33
+			}, {
+				"label" : "N",
+				"prototype" : 0.35
+			}, {
+				"label" : "S",
+				"prototype" : 0.38
+			} ],				
 			"options" : {
 				"eyeWidthToSizeRatio" : 0.08,
 				"eyeHeightToWidthRatio" : 1.5,
 				"eyeXPositionToSizeRatio" : 0.2,
 				"eyeYPositionToSizeRatio" : 0.1,
+				"eyesSizeScaled" : false,
+				"eyebrows" : false,
+				"leftEyeBrowLeftYPositionToSizeRatio": 0.25,
+				"leftEyeBrowRightYPositionToSizeRatio": 0.3,
 				"mouthLengthToSizeRatio": 0.55,
 				"mouthYPositionToSizeRatio": 0.2,
 				"smileToSizeRatio": 0.3,
+				"secondSmile": false,
+				"gradient" : false,
+				"gradientColorBegin": "#0752DE",
+				"gradientColorEnd": "yellow",
 				"canvasFuzzyHeight": 150,
 				"canvasFuzzyWidth": 400				
 			}
@@ -598,6 +635,10 @@ function Emoticon(canvas, element, configuration) {
 	this.draw = function(x) {
 		var color = [];
 		var smile;
+		var secondSmile;
+		var eyesSize;
+		var gradientValue;
+		var eyebrows;
 		var size = this.canvas.width;
 		var context = this.canvas.getContext("2d");
 
@@ -607,26 +648,37 @@ function Emoticon(canvas, element, configuration) {
 
 		// Fuzzifies the value
 		var xFuzzy = this.fuzzy.fuzzyDescription(x, this.configuration.fuzzyPartition);
-
+		
 		// Gets the color and the smile
 		color = this.fuzzy.defuzzify(xFuzzy, this.configuration.colorPrototypes);
 		smile = this.fuzzy.defuzzify(xFuzzy, this.configuration.smilePrototypes);
+		secondSmile = this.fuzzy.defuzzify(xFuzzy, this.configuration.secondSmilePrototypes);
 		eyesSize = this.fuzzy.defuzzify(xFuzzy, this.configuration.eyesSizePrototypes);
-		
+		gradientValue = this.fuzzy.defuzzify(xFuzzy, this.configuration.gradientPrototypes); 
+		eyebrows =  this.fuzzy.defuzzify(xFuzzy, this.configuration.eyebrowsPrototypes); 
+			
+		// Sets the gradient
+		var gradient = context.createLinearGradient(0, 0, 0, gradientValue);
+		gradient.addColorStop(0, this.configuration.options.gradientColorBegin);	
+		gradient.addColorStop(1, this.configuration.options.gradientColorEnd);
+
 		// Head
 		context.beginPath();		
 		context.fillStyle = "rgb(" + Math.round(color[0]) + "," + Math.round(color[1]) + "," + Math.round(color[2]) + ")";
+		if (this.configuration.options.gradient && gradientValue > 0) {
+			context.fillStyle = gradient;
+		}
 		context.arc(size/2, size/2, size/2, 0, Math.PI * 2, true);
 		context.fill();	
 		context.closePath();
 
 		// Mouth
+		// First smile
 		context.beginPath();
 		context.moveTo(
 				size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
 				size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio))
 		;
-		context.closePath();
 		context.quadraticCurveTo(
 				size/2, 
 				size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smile), 
@@ -634,7 +686,62 @@ function Emoticon(canvas, element, configuration) {
 				size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
 		);
 		context.stroke();
+		context.closePath();
+		
+		// Second smile
+		if (this.configuration.options.secondSmile) {
+			context.beginPath();
+			context.moveTo(
+					size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio))
+			;
+			context.quadraticCurveTo(
+					size/2, 
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmile), 
+					size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
+			);
+			context.stroke();
+			context.closePath();
+		}
 
+		// Eyebrows
+		if (this.configuration.options.eyebrows) {		
+			// Left eyebrow
+			context.save();
+			context.beginPath();
+			context.lineWidth = 2;
+			context.moveTo(
+					size/2 - (this.configuration.options.eyeXPositionToSizeRatio + this.configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - this.configuration.options.leftEyeBrowLeftYPositionToSizeRatio*size
+			);
+
+			context.quadraticCurveTo(
+					size/2 - this.configuration.options.eyeXPositionToSizeRatio*size, 
+					size/2 - eyebrows*size, 
+					size/2 - (this.configuration.options.eyeXPositionToSizeRatio - this.configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - this.configuration.options.leftEyeBrowRightYPositionToSizeRatio*size
+			);	
+			context.stroke();
+			context.closePath();	
+			
+			// Right eyebrow
+			context.beginPath();
+			context.moveTo(
+					size/2 + (this.configuration.options.eyeXPositionToSizeRatio + this.configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - this.configuration.options.leftEyeBrowLeftYPositionToSizeRatio*size
+			);
+			context.quadraticCurveTo(
+					size/2 + this.configuration.options.eyeXPositionToSizeRatio*size, 
+					size/2 - eyebrows*size, 
+					size/2 + (this.configuration.options.eyeXPositionToSizeRatio - this.configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - this.configuration.options.leftEyeBrowRightYPositionToSizeRatio*size
+			);	
+			context.stroke();
+			context.closePath();
+			context.restore();
+		}
+		
 		// Left eye
 		context.fillStyle = "black";
 		context.beginPath();
@@ -644,10 +751,15 @@ function Emoticon(canvas, element, configuration) {
 		);
 		context.closePath();
 		context.save();
-		context.scale(1.0, eyesSize*this.configuration.options.eyeHeightToWidthRatio);
+		scaleWidth = 1.0;
+		scaleHeight = eyesSize*this.configuration.options.eyeHeightToWidthRatio;
+		if (this.configuration.options.eyesSizeScaled) {
+			scaleWidth = eyesSize;
+		}
+		context.scale(scaleWidth, scaleHeight);
 		context.arc(
-				size/2 - this.configuration.options.eyeXPositionToSizeRatio*size, 
-				(size/2  - this.configuration.options.eyeYPositionToSizeRatio*size)/(eyesSize*this.configuration.options.eyeHeightToWidthRatio), 
+				(size/2 - this.configuration.options.eyeXPositionToSizeRatio*size)/scaleWidth, 
+				(size/2  - this.configuration.options.eyeYPositionToSizeRatio*size)/scaleHeight, 
 				this.configuration.options.eyeWidthToSizeRatio*size, 
 				0, Math.PI * 2, true
 		);
@@ -661,18 +773,22 @@ function Emoticon(canvas, element, configuration) {
 				size/2 - this.configuration.options.eyeYPositionToSizeRatio*size
 		);
 		context.closePath();
-
 		context.save();
-		context.scale(1.0, eyesSize*this.configuration.options.eyeHeightToWidthRatio);
+		scaleWidth = 1.0;
+		scaleHeight = eyesSize*this.configuration.options.eyeHeightToWidthRatio;
+		if (this.configuration.options.eyesSizeScaled) {
+			scaleWidth = eyesSize;
+		}
+		context.scale(scaleWidth, scaleHeight);
 		context.arc(
-				size/2 + this.configuration.options.eyeXPositionToSizeRatio*size, 
-				(size/2 - this.configuration.options.eyeYPositionToSizeRatio*size)/(eyesSize*this.configuration.options.eyeHeightToWidthRatio), 
+				(size/2 + this.configuration.options.eyeXPositionToSizeRatio*size)/scaleWidth, 
+				(size/2  - this.configuration.options.eyeYPositionToSizeRatio*size)/scaleHeight, 
 				this.configuration.options.eyeWidthToSizeRatio*size, 
-				0, Math.PI * 2, true);
+				0, Math.PI * 2, true
+		);		
 		context.fill();
 		context.restore();
-
-		context.stroke();
+		context.stroke();	
 	}
 }
 

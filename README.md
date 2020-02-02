@@ -3,7 +3,7 @@
 JavaScript to build pictorial scales associated with HTML elements.
 
 It can be used to display emoticons, arrows, sun/cloud from given values
-or to associate them with slide range, for example for survey applications.
+or to associate them with slide ranges, for example for survey applications.
 
 ## Examples
 
@@ -64,6 +64,37 @@ var x = new Emoticon("canvas4", "slider4", {
 				});
 ```
 
+#### Prototypes for Emoticon
+
+- colorPrototypes: prototypes for the color.
+- gradientPrototypes: prototypes for the gradient.
+- smilePrototypes: prototypes for the smile.
+- secondSmilePrototypes: prototypes for the second smile.
+- eyesSizePrototypes: prototypes for eyes size.
+- eyebrowsPrototypes: : prototypes for the eye brows.
+	
+#### Options for BiEmoticon
+
+- colorPrototypes: prototypes for the color.
+- gradientPrototypes: prototypes for the gradient.
+- smilePrototypes: prototypes for the smile.
+
+#### Prototypes for Sun/Cloud
+
+- sunSizePrototypes: prototypes for the sun size.
+- sunPositionPrototypes: prototypes for the sun position.
+- sunColorPrototypes: prototypes for the sun color.
+- sunraySizePrototypes: prototypes for the sunray size.
+- cloudSizePrototypes: prototypes for the cloud size.
+- cloudPositionPrototypes: prototypes for the cloud position.
+- cloudColorPrototypes: prototypes for the cloud color.
+- rainLevelPrototypes: prototypes for the rain level.		
+		
+#### Prototypes for Arrow
+
+- colorPrototypes: prototypes for the color.
+- anglePrototypes: prototypes for the angle.
+	
 ### Options
 
 Example: modification the size of the canvas which displays the fuzzy canvas.
@@ -83,17 +114,32 @@ var x = new Emoticon("canvas1", "slider1", {
 - eyeHeightToWidthRatio (default 1.5): ratio of the eye height to the eye width.
 - eyeXPositionToSizeRatio (default 0.2): ratio of the position on the x-axis of the eye to the size of the emoticon.
 - eyeXPositionToSizeRatio (default 0.1): ratio of the position on the y-axis of the to the size of the emoticon.
+- eyesSizeScaled (default false): if true eyes are scale in both direction.
+- eyebrows (default true): if true eyebrows are displayed. 
+- leftEyeBrowLeftYPositionToSizeRatio (default 0.25): left position on the y-axis of the left eyebrow.
+- leftEyeBrowRightYPositionToSizeRatio (default 0.3): right position on the y-axis of the left eyebrow.
 - mouthLengthToSizeRatio (default 0.55): ratio of the mouth length to the size of the emoticon.
 - smileToSizeRatio (default 0.3): ratio of the smile to the size of the emoticon.
+- secondSmile (default false): if true a second smile is displayed. It can be used to simulate a mouth opening.
+- gradient (default false): if true a gradient is applied to the head.
+- gradientColorBegin (default #0752DE): begin color for the gradient.
+- gradientColorEnd (default yellow): end color for the gradient.
 - canvasFuzzyHeight (default 150): height of the canvas used to display the fuzzy partition.
-- canvasFuzzyWidth (default 400): width of the canvas used to display the fuzzy partition.
+- canvasFuzzyWidth (default 400): width of the canvas used to display the fuzzy partition.	
 
 #### Options for BiEmoticon
 
-- same options as Emoticon.
+- eyeWidthToSizeRatio (default 0.08): ratio of the eye width to the size of the emoticon.
+- eyeHeightToWidthRatio (default 1.5): ratio of the eye height to the eye width.
+- eyeXPositionToSizeRatio (default 0.2): ratio of the position on the x-axis of the eye to the size of the emoticon.
+- eyeXPositionToSizeRatio (default 0.1): ratio of the position on the y-axis of the to the size of the emoticon.
+- mouthLengthToSizeRatio (default 0.55): ratio of the mouth length to the size of the emoticon.
+- smileToSizeRatio (default 0.3): ratio of the smile to the size of the emoticon.
+- canvasFuzzyHeight (default 150): height of the canvas used to display the fuzzy partition.
+- canvasFuzzyWidth (default 400): width of the canvas used to display the fuzzy partition.	
 - sliderThumbWidth (default 10): width of the slider thumb.
 
-### Options for Sun/Cloud
+#### Options for Sun/Cloud
 
 - None.
 
