@@ -121,6 +121,8 @@ var x = new Emoticon("canvas1", "slider1", {
 - mouthLengthToSizeRatio (default 0.55): ratio of the mouth length to the size of the emoticon.
 - smileToSizeRatio (default 0.3): ratio of the smile to the size of the emoticon.
 - secondSmile (default false): if true a second smile is displayed. It can be used to simulate a mouth opening.
+- smileCurve (default "quadratic") : use "cubic" or "quadratic" to change the type of Bézier curve for the smile.
+- smileCurve (default "quadratic") : use "cubic" or "quadratic" to change the type of Bézier curve for the second smile.
 - gradient (default false): if true a gradient is applied to the head.
 - gradientColorBegin (default #0752DE): begin color for the gradient.
 - gradientColorEnd (default yellow): end color for the gradient.

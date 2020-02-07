@@ -584,6 +584,8 @@ function Emoticon(canvas, element, configuration) {
 				"mouthYPositionToSizeRatio": 0.2,
 				"smileToSizeRatio": 0.3,
 				"secondSmile": false,
+				"smileCurve": "quadratic",
+				"secondSmileCurve": "quadratic",
 				"gradient" : false,
 				"gradientColorBegin": "#0752DE",
 				"gradientColorEnd": "yellow",
@@ -679,12 +681,24 @@ function Emoticon(canvas, element, configuration) {
 				size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
 				size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio))
 		;
-		context.quadraticCurveTo(
-				size/2, 
-				size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smile), 
-				size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-				size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
-		);
+		if (this.configuration.options.secondSmileCurve == "cubic") {
+			context.bezierCurveTo(
+					size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smile), 
+					size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smile), 
+					size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
+			);		
+		} else {
+			context.quadraticCurveTo(
+					size/2, 
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smile), 
+					size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
+			);		
+		}		
+
 		context.stroke();
 		context.closePath();
 		
@@ -695,12 +709,24 @@ function Emoticon(canvas, element, configuration) {
 					size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
 					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio))
 			;
-			context.quadraticCurveTo(
-					size/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmile), 
-					size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
-			);
+			if (this.configuration.options.secondSmileCurve == "cubic") {
+				context.bezierCurveTo(
+						size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmile), 
+						size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmile), 
+						size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
+				);						
+			} else {
+				context.quadraticCurveTo(
+						size/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmile), 
+						size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
+				);				
+			}
+	
 			context.stroke();
 			context.closePath();
 		}
