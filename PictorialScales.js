@@ -572,21 +572,24 @@ function Emoticon(canvas, element, configuration) {
 				"prototype" : 0.38
 			} ],				
 			"options" : {
-				"eyeWidthToSizeRatio" : 0.08,
-				"eyeHeightToWidthRatio" : 1.5,
-				"eyeXPositionToSizeRatio" : 0.2,
-				"eyeYPositionToSizeRatio" : 0.1,
-				"eyesSizeScaled" : false,
-				"eyebrows" : false,
+				"eyeWidthToSizeRatio": 0.08,
+				"eyeHeightToWidthRatio": 1.5,
+				"eyeXPositionToSizeRatio": 0.2,
+				"eyeYPositionToSizeRatio": 0.1,
+				"eyesFillColor": "black",
+				"eyesSizeScaled": false,
+				"eyebrows": false,
 				"leftEyeBrowLeftYPositionToSizeRatio": 0.25,
 				"leftEyeBrowRightYPositionToSizeRatio": 0.3,
 				"mouthLengthToSizeRatio": 0.55,
 				"mouthYPositionToSizeRatio": 0.2,
+				"mouthFill": false,
+				"mouthFillColor": "black",
 				"smileToSizeRatio": 0.3,
 				"secondSmile": false,
 				"smileCurve": "quadratic",
 				"secondSmileCurve": "quadratic",
-				"gradient" : false,
+				"gradient": false,
 				"gradientColorBegin": "#0752DE",
 				"gradientColorEnd": "yellow",
 				"canvasFuzzyHeight": 150,
@@ -698,7 +701,11 @@ function Emoticon(canvas, element, configuration) {
 					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
 			);		
 		}		
-
+		// Fills the mouth with a given color if required
+		if (this.configuration.options.mouthFill) {
+			context.fillStyle = this.configuration.options.mouthFillColor;	
+		}
+		context.fill();	
 		context.stroke();
 		context.closePath();
 		
@@ -726,7 +733,11 @@ function Emoticon(canvas, element, configuration) {
 						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
 				);				
 			}
-	
+			// Fills the mouth with a given color if required
+			if (this.configuration.options.mouthFill) {
+				context.fillStyle = this.configuration.options.mouthFillColor;			
+			}
+			context.fill();		
 			context.stroke();
 			context.closePath();
 		}
@@ -769,7 +780,7 @@ function Emoticon(canvas, element, configuration) {
 		}
 		
 		// Left eye
-		context.fillStyle = "black";
+		context.fillStyle = this.configuration.options.eyesFillColor;
 		context.beginPath();
 		context.moveTo(
 				size/2 - this.configuration.options.eyeXPositionToSizeRatio*size, 
@@ -789,7 +800,7 @@ function Emoticon(canvas, element, configuration) {
 				this.configuration.options.eyeWidthToSizeRatio*size, 
 				0, Math.PI * 2, true
 		);
-		context.fill();
+		context.fill();		
 		context.restore();
 
 		// Right eye
@@ -814,7 +825,7 @@ function Emoticon(canvas, element, configuration) {
 		);		
 		context.fill();
 		context.restore();
-		context.stroke();	
+	
 	}
 }
 

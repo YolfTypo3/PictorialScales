@@ -114,11 +114,14 @@ var x = new Emoticon("canvas1", "slider1", {
 - eyeHeightToWidthRatio (default 1.5): ratio of the eye height to the eye width.
 - eyeXPositionToSizeRatio (default 0.2): ratio of the position on the x-axis of the eye to the size of the emoticon.
 - eyeXPositionToSizeRatio (default 0.1): ratio of the position on the y-axis of the to the size of the emoticon.
+- eyesFillColor (default "black"): color of the eyes.
 - eyesSizeScaled (default false): if true eyes are scale in both direction.
 - eyebrows (default true): if true eyebrows are displayed. 
 - leftEyeBrowLeftYPositionToSizeRatio (default 0.25): left position on the y-axis of the left eyebrow.
 - leftEyeBrowRightYPositionToSizeRatio (default 0.3): right position on the y-axis of the left eyebrow.
 - mouthLengthToSizeRatio (default 0.55): ratio of the mouth length to the size of the emoticon.
+- mouthFill (default false): if true the mouth is filled with mouthfillColor.
+- mouthFillColor (default "black"): the color used to fill the mouth if mouthFill is true.
 - smileToSizeRatio (default 0.3): ratio of the smile to the size of the emoticon.
 - secondSmile (default false): if true a second smile is displayed. It can be used to simulate a mouth opening.
 - smileCurve (default "quadratic") : use "cubic" or "quadratic" to change the type of Bezier curve for the smile.
