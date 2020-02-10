@@ -73,7 +73,7 @@ var x = new Emoticon("canvas4", "slider4", {
 - eyesSizePrototypes: prototypes for eyes size.
 - eyebrowsPrototypes: : prototypes for the eye brows.
 	
-#### Options for BiEmoticon
+#### Prototypes for BiEmoticon
 
 - colorPrototypes: prototypes for the color.
 - gradientPrototypes: prototypes for the gradient.
