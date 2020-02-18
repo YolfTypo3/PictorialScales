@@ -138,8 +138,19 @@ var x = new Emoticon("canvas1", "slider1", {
 - eyeHeightToWidthRatio (default 1.5): ratio of the eye height to the eye width.
 - eyeXPositionToSizeRatio (default 0.2): ratio of the position on the x-axis of the eye to the size of the emoticon.
 - eyeXPositionToSizeRatio (default 0.1): ratio of the position on the y-axis of the to the size of the emoticon.
+- eyesFillColor (default "black"): color of the eyes.
+- eyesSizeScaled (default false): if true eyes are scale in both direction.
+- eyebrows (default true): if true eyebrows are displayed. 
+- leftEyeBrowLeftYPositionToSizeRatio (default 0.25): left position on the y-axis of the left eyebrow.
+- leftEyeBrowRightYPositionToSizeRatio (default 0.3): right position on the y-axis of the left eyebrow.
 - mouthLengthToSizeRatio (default 0.55): ratio of the mouth length to the size of the emoticon.
-- smileToSizeRatio (default 0.3): ratio of the smile to the size of the emoticon.
+- smileToSizeRatio (default 0.2): ratio of the smile to the size of the emoticon.
+- secondSmile (default false): if true a second smile is displayed. It can be used to simulate a mouth opening.
+- smileCurve (default "quadratic") : use "cubic" or "quadratic" to change the type of Bezier curve for the smile.
+- secondSmileCurve (default "quadratic") : use "cubic" or "quadratic" to change the type of Bezier curve for the second smile.
+- gradient (default false): if true a gradient is applied to the head.
+- gradientColorBegin (default #0752DE): begin color for the gradient.
+- gradientColorEnd (default yellow): end color for the gradient.
 - canvasFuzzyHeight (default 150): height of the canvas used to display the fuzzy partition.
 - canvasFuzzyWidth (default 400): width of the canvas used to display the fuzzy partition.	
 - sliderThumbWidth (default 10): width of the slider thumb.

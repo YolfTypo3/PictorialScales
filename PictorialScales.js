@@ -684,7 +684,7 @@ function Emoticon(canvas, element, configuration) {
 				size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
 				size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio))
 		;
-		if (this.configuration.options.secondSmileCurve == "cubic") {
+		if (this.configuration.options.smileCurve == "cubic") {
 			context.bezierCurveTo(
 					size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
 					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smile), 
@@ -780,7 +780,6 @@ function Emoticon(canvas, element, configuration) {
 		}
 		
 		// Left eye
-		context.fillStyle = this.configuration.options.eyesFillColor;
 		context.beginPath();
 		context.moveTo(
 				size/2 - this.configuration.options.eyeXPositionToSizeRatio*size, 
@@ -788,6 +787,7 @@ function Emoticon(canvas, element, configuration) {
 		);
 		context.closePath();
 		context.save();
+		context.fillStyle = this.configuration.options.eyesFillColor;
 		scaleWidth = 1.0;
 		scaleHeight = eyesSize*this.configuration.options.eyeHeightToWidthRatio;
 		if (this.configuration.options.eyesSizeScaled) {
@@ -811,6 +811,7 @@ function Emoticon(canvas, element, configuration) {
 		);
 		context.closePath();
 		context.save();
+		context.fillStyle = this.configuration.options.eyesFillColor;
 		scaleWidth = 1.0;
 		scaleHeight = eyesSize*this.configuration.options.eyeHeightToWidthRatio;
 		if (this.configuration.options.eyesSizeScaled) {
@@ -825,7 +826,6 @@ function Emoticon(canvas, element, configuration) {
 		);		
 		context.fill();
 		context.restore();
-	
 	}
 }
 
@@ -869,6 +869,16 @@ function BiEmoticon(canvas, element, configuration) {
 				"label" : "S",
 				"prototype" : [ 0, 255, 0 ]
 			} ],
+			"gradientPrototypes" : [ {
+				"label" : "U",
+				"prototype" : 0
+			}, {
+				"label" : "N",
+				"prototype" : 0.3*this.canvas.height
+			}, {
+				"label" : "S",
+				"prototype" : 0.9*this.canvas.height
+			} ],				
 			"smilePrototypes" : [ {
 				"label" : "U",
 				"prototype" : -0.5
@@ -879,16 +889,55 @@ function BiEmoticon(canvas, element, configuration) {
 				"label" : "S",
 				"prototype" : 1
 			} ],
+			"secondSmilePrototypes" : [ {
+				"label" : "U",
+				"prototype" : -0.5
+			}, {
+				"label" : "N",
+				"prototype" : 0
+			}, {
+				"label" : "S",
+				"prototype" : 1
+			} ],						
+			"eyesSizePrototypes" : [ {
+				"label" : "U",
+				"prototype" : 1
+			}, {
+				"label" : "N",
+				"prototype" : 1
+			}, {
+				"label" : "S",
+				"prototype" : 1
+			} ],	
+			"eyebrowsPrototypes" : [ {
+				"label" : "U",
+				"prototype" : 0.33
+			}, {
+				"label" : "N",
+				"prototype" : 0.35
+			}, {
+				"label" : "S",
+				"prototype" : 0.38
+			} ],
 			"options" : {
 				"eyeWidthToSizeRatio" : 0.08,
 				"eyeHeightToWidthRatio" : 1.5,
 				"eyeXPositionToSizeRatio" : 0.2,
 				"eyeYPositionToSizeRatio" : 0.1,
+				"eyesFillColor": "black",
+				"eyesSizeScaled": false,
+				"eyebrows": false,
+				"leftEyeBrowLeftYPositionToSizeRatio": 0.25,
+				"leftEyeBrowRightYPositionToSizeRatio": 0.3,				
 				"mouthLengthToSizeRatio": 0.55,
 				"mouthYPositionToSizeRatio": 0.2,
 				"smileToSizeRatio": 0.2,
+				"secondSmile": false,
+				"gradient": false,
+				"gradientColorBegin": "#0752DE",
+				"gradientColorEnd": "yellow",				
 				"sliderThumbWidth": 10,
-				"canvasFuzzyHeight": 150,
+				"canvasFuzzyHeight": 160,
 				"canvasFuzzyWidth": 400
 			}
 	};
@@ -910,9 +959,12 @@ function BiEmoticon(canvas, element, configuration) {
 		
 		// Sets the thumb width
 		this.sliderThumbWidth = configuration.configuration.options.sliderThumbWidth;
-		document.getElementById("slidersStyle").innerHTML = "." + this.element.id + "::-moz-range-thumb {width: " + this.sliderThumbWidth + "%;}";
-		document.getElementById("slidersStyle").innerHTML += "." + this.element.id + "::-webkit-slider-thumb {width: " + this.sliderThumbWidth + "%;}";
-		document.getElementById("slidersStyle").innerHTML += "." + this.element.id + "::-ms-thumb {width: " + Math.round(this.sliderThumbWidth*this.element.offsetWidth/100) + "px;}";
+		var style = document.createElement("style");
+		style.setAttribute("id", "sliderStyle_" + this.element.id);
+		document.head.append(style);
+		document.getElementById("sliderStyle_" + this.element.id).innerHTML = "." + this.element.id + "::-moz-range-thumb {width: " + this.sliderThumbWidth + "%;}";
+		document.getElementById("sliderStyle_" + this.element.id).innerHTML += "." + this.element.id + "::-webkit-slider-thumb {width: " + this.sliderThumbWidth + "%;}";
+		document.getElementById("sliderStyle_" + this.element.id).innerHTML += "." + this.element.id + "::-ms-thumb {width: " + Math.round(this.sliderThumbWidth*this.element.offsetWidth/100) + "px;}";
 
 		// Adds the slider id as an additional class to the slider
 		this.element.classList.add(this.element.id);		
@@ -957,7 +1009,7 @@ function BiEmoticon(canvas, element, configuration) {
 	this.wheelEventManager = function(event) {
 		event.preventDefault();
 		if(this.rightButtonDown === true) {
-			var style = document.getElementById("slidersStyle");
+			var style = document.getElementById("sliderStyle_" + this.element.id);
 			if (event.deltaY > 0) {
 				if (parseInt(this.element.value) < 100 - this.sliderThumbWidth/2) {
 					this.element.value = parseInt(this.element.value) + 1;
@@ -974,7 +1026,7 @@ function BiEmoticon(canvas, element, configuration) {
 
 		  	style.innerHTML = "." + this.element.id + "::-moz-range-thumb {width: " + self.sliderThumbWidth + "%;}";
 		  	style.innerHTML += "." + this.element.id + "::-webkit-slider-thumb {width: " + self.sliderThumbWidth + "%;}";
-		  	style.innerHTML += "." + this.element.id + "::-ms-thumb {width: " + this.sliderThumbWidth*this.element.offsetWidth/100 + "px;}";	
+		  	style.innerHTML += "." + this.element.id + "::-ms-thumb {width: " + this.sliderThumbWidth*this.element.offsetWidth/100 + "px;}\n";	
 	  	
 		}	
 		this.render();
@@ -1033,10 +1085,18 @@ function BiEmoticon(canvas, element, configuration) {
 	 * Draws the bi-emoticon
 	 */
 	this.draw = function(x) {		
-		var colorLow = [];
-		var colorHigh = [];
-		var smileLow;
-		var smileHigh;
+		var colorLower = [];
+		var colorUpper = [];
+		var smileLower;
+		var smileUpper;
+		var secondSmileLower;
+		var secondSmileUpper;		
+		var eyesSizeLower;
+		var eyesSizeUpper;
+		var gradientValueLower;
+		var gradientValueUpper;		
+		var eyebrowsLower;
+		var eyebrowsUpper;
 		var size = this.canvas.width;
 		var context = this.canvas.getContext('2d');
 
@@ -1055,31 +1115,56 @@ function BiEmoticon(canvas, element, configuration) {
 
 		// Cuts the fuzzy input at the level 1 - LowerDescriptionMax
 		var cut = [x[1] - this.sliderThumbWidth * (1 - LowerDescriptionMax) / 2, x[1] + this.sliderThumbWidth * (1 - LowerDescriptionMax) / 2];
-
+		this.fuzzy.coverageInterval = cut;
+		this.fuzzy.levelOfConfidence = LowerDescriptionMax;
+		
 		// Gets the color and the smile for the lower bound
 		xFuzzy = this.fuzzy.fuzzyDescription(cut[0], this.configuration.fuzzyPartition);
-		colorLow = this.fuzzy.defuzzify(xFuzzy, this.configuration.colorPrototypes);
-		smileLow = this.fuzzy.defuzzify(xFuzzy, this.configuration.smilePrototypes);
+		colorLower = this.fuzzy.defuzzify(xFuzzy, this.configuration.colorPrototypes);
+		smileLower = this.fuzzy.defuzzify(xFuzzy, this.configuration.smilePrototypes);
+		secondSmileLower = this.fuzzy.defuzzify(xFuzzy, this.configuration.secondSmilePrototypes);
+		eyesSizeLower = this.fuzzy.defuzzify(xFuzzy, this.configuration.eyesSizePrototypes);
+		gradientValueLower = this.fuzzy.defuzzify(xFuzzy, this.configuration.gradientPrototypes); 
+		eyebrowsLower =  this.fuzzy.defuzzify(xFuzzy, this.configuration.eyebrowsPrototypes); 
 
 		// Gets the color and the smile for the upper bound
 		xFuzzy = this.fuzzy.fuzzyDescription(cut[1], this.configuration.fuzzyPartition);
-		colorHigh = this.fuzzy.defuzzify(xFuzzy, this.configuration.colorPrototypes);
-		smileHigh = this.fuzzy.defuzzify(xFuzzy, this.configuration.smilePrototypes);			
-
+		colorUpper = this.fuzzy.defuzzify(xFuzzy, this.configuration.colorPrototypes);
+		smileUpper = this.fuzzy.defuzzify(xFuzzy, this.configuration.smilePrototypes);
+		secondSmileUpper = this.fuzzy.defuzzify(xFuzzy, this.configuration.secondSmilePrototypes);
+		eyesSizeUpper = this.fuzzy.defuzzify(xFuzzy, this.configuration.eyesSizePrototypes);
+		gradientValueUpper = this.fuzzy.defuzzify(xFuzzy, this.configuration.gradientPrototypes); 
+		eyebrowsUpper =  this.fuzzy.defuzzify(xFuzzy, this.configuration.eyebrowsPrototypes); 		
+		
+		// Sets the gradient
+		var gradientLower = context.createLinearGradient(0, 0, 0, gradientValueLower);
+		gradientLower.addColorStop(0, this.configuration.options.gradientColorBegin);	
+		gradientLower.addColorStop(1, this.configuration.options.gradientColorEnd);
+		var gradientUpper = context.createLinearGradient(0, 0, 0, gradientValueUpper);
+		gradientUpper.addColorStop(0, this.configuration.options.gradientColorBegin);	
+		gradientUpper.addColorStop(1, this.configuration.options.gradientColorEnd);		
+		
 		// Left part of the Head
-		context.beginPath();		
-		context.fillStyle = "rgb(" + Math.round(colorLow[0]) + "," + Math.round(colorLow[1]) + "," + Math.round(colorLow[2]) + ")";
+		context.beginPath();	
+		context.fillStyle = "rgb(" + Math.round(colorLower[0]) + "," + Math.round(colorLower[1]) + "," + Math.round(colorLower[2]) + ")";
+		if (this.configuration.options.gradient && gradientValueLower > 0) {
+			context.fillStyle = gradientLower;
+		}
 		context.arc(size/2, size/2, size/2, this.leftStartAngle, this.leftEndAngle, false);
 		context.fill();	
 		context.closePath();
 
 		// Right part of the Head
 		context.beginPath();		
-		context.fillStyle = "rgb(" + Math.round(colorHigh[0]) + "," + Math.round(colorHigh[1]) + "," + Math.round(colorHigh[2])	+ ")";
+		context.fillStyle = "rgb(" + Math.round(colorUpper[0]) + "," + Math.round(colorUpper[1]) + "," + Math.round(colorUpper[2])	+ ")";
+		if (this.configuration.options.gradient && gradientValueUpper> 0) {
+			context.fillStyle = gradientUpper;
+		}
 		context.arc(size/2, size/2, size/2, this.rightStartAngle, this.rightEndAngle, true);
 		context.fill();	
 		context.closePath();			
 
+		// Mouth	
 		// Left part lower Mouth
 		if (this.leftEndAngle != 0) {		
 			context.beginPath();
@@ -1090,27 +1175,61 @@ function BiEmoticon(canvas, element, configuration) {
 			context.closePath();
 			context.quadraticCurveTo(
 					size*(1.2 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileLow), 
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileLower), 
 					size/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileLow)
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileLower)
 			);
 			context.stroke();
 			// Right part lower Mouth
 			context.beginPath();
 			context.moveTo(
 					size/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileLow)
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileLower)
 			);	
 			context.closePath();
 			context.save();
 			context.setLineDash([this.dashSize, this.dashSize]);	
 			context.quadraticCurveTo(
 					size*(0.8 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileLow),
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileLower),
 					size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
 					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
 			);		
-			context.stroke();						
+			context.stroke();
+			
+			// Second smile
+			if (this.configuration.options.secondSmile) {
+				context.beginPath();
+				context.moveTo(
+						size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
+				);
+				context.closePath();
+				context.quadraticCurveTo(
+						size*(1.2 - this.configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileLower), 
+						size/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileLower)
+				);
+				context.stroke();
+				// Right part lower Mouth
+				context.beginPath();
+				context.moveTo(
+						size/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileLower)
+				);	
+				context.closePath();
+				context.save();
+				context.setLineDash([this.dashSize, this.dashSize]);	
+				context.quadraticCurveTo(
+						size*(0.8 + this.configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileLower),
+						size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
+				);		
+				context.stroke();	
+				context.restore();
+			}			
 		}
 		
 		// Left part upper Mouth
@@ -1123,9 +1242,9 @@ function BiEmoticon(canvas, element, configuration) {
 			context.closePath();
 			context.quadraticCurveTo(
 					size*(1.2 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileHigh), 
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileUpper), 
 					size/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileHigh)
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileUpper)
 			);
 			context.stroke();
 			// Right part upper Mouth
@@ -1133,36 +1252,126 @@ function BiEmoticon(canvas, element, configuration) {
 			context.beginPath();
 			context.moveTo(
 					size/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileHigh)
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileUpper)
 			);	
 			context.closePath();
 			context.quadraticCurveTo(
 					size*(0.8 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileHigh),
+					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileUpper),
 					size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
 					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
 			);		
-			context.stroke();	
+			context.stroke();
+			
+			// Second smile
+			if (this.configuration.options.secondSmile) {
+				context.beginPath();
+				context.moveTo(
+						size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
+				);
+				context.closePath();
+				context.quadraticCurveTo(
+						size*(1.2 - this.configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileUpper), 
+						size/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileUpper)
+				);
+				context.stroke();
+				// Right part upper Mouth
+				context.restore();
+				context.beginPath();
+				context.moveTo(
+						size/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileUpper)
+				);	
+				context.closePath();
+				context.quadraticCurveTo(
+						size*(0.8 + this.configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileUpper),
+						size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
+				);		
+				context.stroke();
+				context.restore();
+			}			
+			
+		}
+		
+		// Eyebrows
+		if (this.leftEndAngle == 0) {	
+			eyebrowsLower = eyebrowsUpper;
+		}
+		if (this.rightEndAngle == 0) {	
+			eyebrowsUpper = eyebrowsLower;
+		}
+		if (this.configuration.options.eyebrows) {		
+			// Left eyebrow
+			context.save();
+			context.beginPath();
+			context.lineWidth = 2;
+			context.moveTo(
+					size/2 - (this.configuration.options.eyeXPositionToSizeRatio + this.configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - this.configuration.options.leftEyeBrowLeftYPositionToSizeRatio*size
+			);
+
+			context.quadraticCurveTo(
+					size/2 - this.configuration.options.eyeXPositionToSizeRatio*size, 
+					size/2 - eyebrowsLower*size, 
+					size/2 - (this.configuration.options.eyeXPositionToSizeRatio - this.configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - this.configuration.options.leftEyeBrowRightYPositionToSizeRatio*size
+			);	
+			context.stroke();
+			context.closePath();	
+			
+			// Right eyebrow
+			context.beginPath();
+			context.moveTo(
+					size/2 + (this.configuration.options.eyeXPositionToSizeRatio + this.configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - this.configuration.options.leftEyeBrowLeftYPositionToSizeRatio*size
+			);
+			context.quadraticCurveTo(
+					size/2 + this.configuration.options.eyeXPositionToSizeRatio*size, 
+					size/2 - eyebrowsUpper*size, 
+					size/2 + (this.configuration.options.eyeXPositionToSizeRatio - this.configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - this.configuration.options.leftEyeBrowRightYPositionToSizeRatio*size
+			);	
+			context.stroke();
+			context.closePath();
+			context.restore();
+		}
+		
+		// Eyes
+		if (this.leftEndAngle == 0) {	
+			eyesSizeLower = eyesSizeUpper;
+		}
+		if (this.rightEndAngle == 0) {	
+			eyesSizeUpper = eyesSizeLower;
 		}
 		// Left eye
-		context.fillStyle = "black";
 		context.beginPath();
 		context.moveTo(
 				size/2 - this.configuration.options.eyeXPositionToSizeRatio*size, 
-				size/2  - this.configuration.options.eyeYPositionToSizeRatio*size
+				size/2 - this.configuration.options.eyeYPositionToSizeRatio*size
 		);
 		context.closePath();
 		context.save();
-		context.scale(1.0, this.configuration.options.eyeHeightToWidthRatio);
+		context.fillStyle = this.configuration.options.eyesFillColor;		
+		scaleWidth = 1.0;
+		scaleHeight = eyesSizeLower*this.configuration.options.eyeHeightToWidthRatio;
+		if (this.configuration.options.eyesSizeScaled) {
+			scaleWidth = eyesSizeLower;
+		}
+		context.scale(scaleWidth, scaleHeight);
 		context.arc(
-				size/2 - this.configuration.options.eyeXPositionToSizeRatio*size, 
-				(size/2  - this.configuration.options.eyeYPositionToSizeRatio*size)/this.configuration.options.eyeHeightToWidthRatio, 
+				(size/2 - this.configuration.options.eyeXPositionToSizeRatio*size)/scaleWidth, 
+				(size/2  - this.configuration.options.eyeYPositionToSizeRatio*size)/scaleHeight, 
 				this.configuration.options.eyeWidthToSizeRatio*size, 
-				0,	Math.PI * 2, true
+				0, Math.PI * 2, true
 		);
-		context.fill();
+		context.fill();		
 		context.restore();
-
+		
 		// Right eye
 		context.beginPath();
 		context.moveTo(
@@ -1171,17 +1380,21 @@ function BiEmoticon(canvas, element, configuration) {
 		);
 		context.closePath();
 		context.save();
-		context.scale(1.0, this.configuration.options.eyeHeightToWidthRatio);
+		context.fillStyle = this.configuration.options.eyesFillColor;
+		scaleWidth = 1.0;
+		scaleHeight = eyesSizeUpper*this.configuration.options.eyeHeightToWidthRatio;
+		if (this.configuration.options.eyesSizeScaled) {
+			scaleWidth = eyesSizeUpper;
+		}
+		context.scale(scaleWidth, scaleHeight);
 		context.arc(
-				size/2 + this.configuration.options.eyeXPositionToSizeRatio*size, 
-				(size/2 - this.configuration.options.eyeYPositionToSizeRatio*size)/this.configuration.options.eyeHeightToWidthRatio, 
+				(size/2 + this.configuration.options.eyeXPositionToSizeRatio*size)/scaleWidth, 
+				(size/2  - this.configuration.options.eyeYPositionToSizeRatio*size)/scaleHeight, 
 				this.configuration.options.eyeWidthToSizeRatio*size, 
 				0, Math.PI * 2, true
-		);
+		);		
 		context.fill();
 		context.restore();
-
-		context.stroke();
 	}
 }
 
@@ -1355,6 +1568,7 @@ function Fuzzy(parentObject) {
 	this.parentObject = parentObject;
 	this.canvasFuzzy = document.getElementById(parentObject.canvas.id + "Fuzzy");
 	this.fuzzyInput = null;
+	this.coverageInterval = null;
 
 	/**
 	 * Draws the fuzzy partition
@@ -1391,18 +1605,22 @@ function Fuzzy(parentObject) {
 		// Draws the the membership functions
 		var context = this.canvasFuzzy.getContext("2d");
 		var coeff = this.canvasFuzzy.width/(upperBound - lowerBound);
+		var heightOffset = 10;
 		
 		if (this.canvasFuzzy.getContext) {
 			context.clearRect(0, 0, this.canvasFuzzy.width, this.canvasFuzzy.height);
+			if (Array.isArray(this.fuzzyInput)) {
+				heightOffset = 20;
+			}
 			for (var i=0; i < fuzzyPartition.length; i++) {			
 				context.save();
 				context.beginPath();
 				context.strokeStyle = "rgb(" + fuzzyPartition[i].color[0] + "," + fuzzyPartition[i].color[1] + "," + fuzzyPartition[i].color[2]
 				+ ")";
-				context.moveTo(coeff*(fuzzyPartition[i].bounds[0] - lowerBound), 140);
-				context.lineTo(coeff*(fuzzyPartition[i].bounds[1] - lowerBound), 10);
-				context.lineTo(coeff*(fuzzyPartition[i].bounds[2] - lowerBound), 10);
-				context.lineTo(coeff*(fuzzyPartition[i].bounds[3] - lowerBound), 140);
+				context.moveTo(coeff*(fuzzyPartition[i].bounds[0] - lowerBound), this.canvasFuzzy.height-10);
+				context.lineTo(coeff*(fuzzyPartition[i].bounds[1] - lowerBound), heightOffset);
+				context.lineTo(coeff*(fuzzyPartition[i].bounds[2] - lowerBound), heightOffset);
+				context.lineTo(coeff*(fuzzyPartition[i].bounds[3] - lowerBound), this.canvasFuzzy.height-10);
 				context.closePath();
 				context.stroke();
 				context.restore();
@@ -1414,14 +1632,33 @@ function Fuzzy(parentObject) {
 				context.beginPath();
 				context.setLineDash([3, 3]);
 				if (Array.isArray(this.fuzzyInput)) {			
-					context.moveTo(coeff*(this.fuzzyInput[0] - lowerBound), 140);
-					context.lineTo(coeff*(this.fuzzyInput[1] - lowerBound), 10);
-					context.lineTo(coeff*(this.fuzzyInput[3] - lowerBound), 140);
+					context.moveTo(coeff*(this.fuzzyInput[0] - lowerBound), this.canvasFuzzy.height-10);
+					context.lineTo(coeff*(this.fuzzyInput[1] - lowerBound), heightOffset);
+					context.lineTo(coeff*(this.fuzzyInput[3] - lowerBound), this.canvasFuzzy.height-10);
+					context.stroke();
+					// Draws the coverage interval
+					if (this.coverageInterval !== null) {
+						context.save();
+						context.beginPath();
+						context.setLineDash([3, 1]);
+						context.strokeStyle = "rgb(0, 0, 255)";
+						context.moveTo(coeff*(this.coverageInterval[0] - lowerBound), this.canvasFuzzy.height-10);
+						context.lineTo(coeff*(this.coverageInterval[0] - lowerBound), heightOffset);
+						context.lineTo(coeff*(this.coverageInterval[1] - lowerBound), heightOffset);
+						context.lineTo(coeff*(this.coverageInterval[1] - lowerBound), this.canvasFuzzy.height-10);
+						context.font = "bold 15px Arial";
+						context.textAlign = "center";
+						context.fillText("Level of confidence = " + this.levelOfConfidence.toFixed(2), this.canvasFuzzy.width/2, 15);
+						context.stroke();
+						context.closePath();
+						context.restore();
+					}
 				} else {
-					context.moveTo(coeff*(this.fuzzyInput - lowerBound), 140);
-					context.lineTo(coeff*(this.fuzzyInput - lowerBound), 10);
+					context.moveTo(coeff*(this.fuzzyInput - lowerBound), this.canvasFuzzy.height-10);
+					context.lineTo(coeff*(this.fuzzyInput - lowerBound), heightOffset);
+					context.stroke();
 				}
-				context.stroke();
+				context.closePath();
 				context.restore();
 			}
 		}
@@ -1480,8 +1717,8 @@ function Fuzzy(parentObject) {
 
 		var result = 1.0;
 
-		// + = Inscreasing part of the membership function
-		// - = Decreasing part of the membership function
+		// + = Inscreasing part
+		// - = Decreasing part
 
 		// The kernel of the input does not intersect the support of the
 		// meaning : necessity = 0
@@ -1495,9 +1732,9 @@ function Fuzzy(parentObject) {
 			return 1.0;
 		}
 
-		// Intersection Input+ Signification+
+		// Intersection Input+ Meaning+
 		if (mg2 == g2) {
-			if (g1 <= mg2 && mg2 <= mg1) {
+			if (g1 < mg2 && mg2 <= mg1) {
 				result = Math.min(result, (g2 - mg1) / (mg1 - g1));
 			}
 		} else {	    
@@ -1511,7 +1748,7 @@ function Fuzzy(parentObject) {
 			}
 		}
 
-		// Intersection Input+ Signification-
+		// Intersection Input+ Meaning-
 		if (md2 == d2) {
 			if (g1 <= md2 && md2 <= mg1) {
 				result = Math.min(result, (d2 - mg1) / (mg1 - g1));
@@ -1533,7 +1770,7 @@ function Fuzzy(parentObject) {
 			}
 		}
 
-		// Intersection Input- Signification+
+		// Intersection Input- Meaning+
 		if (mg2 == g2) {
 			if (md1 <= mg2 && mg2 <= d1) {
 				result = Math.min(result, (g2 - md1) / (d1 - md1));
@@ -1555,9 +1792,9 @@ function Fuzzy(parentObject) {
 			}
 		}
 
-		// Intersection Input- Signification-
+		// Intersection Input- Meaning-
 		if (md2 == d2) {
-			if (md1 <= md2 && md2 <= d1) {
+			if (md1 <= md2 && md2 < d1) {
 				result = Math.min(result, (d2 - md1) / (d1 - md1));
 			}
 		} else {
