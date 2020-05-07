@@ -131,6 +131,7 @@ var x = new Emoticon("canvas1", "slider1", {
 - gradientColorEnd (default yellow): end color for the gradient.
 - canvasFuzzyHeight (default 150): height of the canvas used to display the fuzzy partition.
 - canvasFuzzyWidth (default 400): width of the canvas used to display the fuzzy partition.	
+- impreciseInput (default false): if true, a triangular fuzzy input is set (use the mouse right button + wheel to modify it).
 
 #### Options for BiEmoticon
 
@@ -157,7 +158,7 @@ var x = new Emoticon("canvas1", "slider1", {
 
 #### Options for Sun/Cloud
 
-- None.
+- impreciseInput (default false): if true, a triangular fuzzy input is set (use the mouse right button + wheel to modify it).
 
 #### Options for Arrow
 
@@ -165,6 +166,7 @@ var x = new Emoticon("canvas1", "slider1", {
 - arrowLength (default 95): length of the arrow.
 - canvasFuzzyHeight (default 150): height of the canvas used to display the fuzzy partition.
 - canvasFuzzyWidth (default 400): width of the canvas used to display the fuzzy partition.
+- impreciseInput (default false): if true, a triangular fuzzy input is set (use the mouse right button + wheel to modify it).
 
 ## Author
 

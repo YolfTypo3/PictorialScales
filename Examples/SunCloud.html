@@ -14,8 +14,10 @@
 			input elements.</p>
 		<p>Sun/cloud pictorial scale is obtained by controling the sun
 			size, the sun color, the sun position, the sunray size, the cloud
-			size, the cloud color, the cloud position and the rain level.
-		<p>
+			size, the cloud color, the cloud position and the rain level.</p>
+		<p>When the option impreciseInput is set, use the mouse right button + wheel to
+		   modify the fuzzy input. Use SHIFT + Left Click to display either the
+		   lower scale or the upper scale. Use again SHIFT + Left Click to recover both scales.</p>	
 	</div>
 
 	<div class="container">
@@ -29,13 +31,23 @@
 		<input id="element3" type="range" min="0" max="100" value="70"
 			class="slider">
 		<canvas id="canvas3" width="150" height="150"></canvas>
+		<h2>Sun/Cloud from a range slider with an imprecise input</h2>
+		<input id="element4" type="range" min="0" max="100" value="70"
+			class="slider">
+		<canvas id="canvas4" width="150" height="150"></canvas>		
 	</div>
 
 	<script src="../PictorialScales.js" type="text/javascript"></script>
 	<script>
 		var scales = [ new SunCloud("canvas1", "element1"),
 				new SunCloud("canvas2", "element2"),
-				new SunCloud("canvas3", "element3"), ];
+				new SunCloud("canvas3", "element3"),
+				new SunCloud("canvas4", "element4", {
+					"options": {
+						"impreciseInput": true
+					}				
+				})				
+				];
 
 	</script>
 

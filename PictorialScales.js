@@ -1,9 +1,9 @@
 /**
  * PictorialScales.js
  * 
- * Version: 1.0.0
+ * Version: 2.0.0
  *
- * Copyright 2019 Laurent Foulloy
+ * Copyright 2020 Laurent Foulloy
  */
 
 /**
@@ -15,48 +15,45 @@
  * @returns void
  */
 function Arrow(canvas, element, configuration) {
-	// Variables
-	var self = this;
-	
 	// Attributes
 	this.canvas = document.getElementById(canvas);
 	this.element = document.getElementById(element);
-	this.fuzzy = {};
 	this.defaultConfiguration = {
-			"fuzzyPartition" : [ {
-				"bounds" : [ 0, 0, 15, 50 ],
-				"color" : [ 255, 0, 0 ],
-				"label" : "U"
+			"fuzzyPartition": [ {
+				"bounds": [ 0, 0, 15, 50 ],
+				"color": [ 255, 0, 0 ],
+				"label": "U"
 			}, {
-				"bounds" : [ 15, 50, 55, 90 ],
-				"color" : [ 255, 255, 0 ],
-				"label" : "N"
+				"bounds": [ 15, 50, 55, 90 ],
+				"color": [ 255, 255, 0 ],
+				"label": "N"
 			}, {
-				"bounds" : [ 55, 90, 100, 100 ],
-				"color" : [ 0, 255, 0 ],
-				"label" : "S"
+				"bounds": [ 55, 90, 100, 100 ],
+				"color": [ 0, 255, 0 ],
+				"label": "S"
 			} ],
-			"colorPrototypes" : [ {
-				"label" : "U",
-				"prototype" : [ 255, 0, 0 ]
+			"colorPrototypes": [ {
+				"label": "U",
+				"prototype": [ 255, 0, 0 ]
 			}, {
-				"label" : "N",
-				"prototype" : [ 255, 255, 0 ]
+				"label": "N",
+				"prototype": [ 255, 255, 0 ]
 			}, {
-				"label" : "S",
-				"prototype" : [ 0, 255, 0 ]
+				"label": "S",
+				"prototype": [ 0, 255, 0 ]
 			} ],		
-			"anglePrototypes" : [ {
-				"label" : "U",
-				"prototype" : -40
+			"anglePrototypes": [ {
+				"label": "U",
+				"prototype": -40
 			}, {
-				"label" : "N",
-				"prototype" : 0
+				"label": "N",
+				"prototype": 0
 			}, {
-				"label" : "S",
-				"prototype" : 40
+				"label": "S",
+				"prototype": 40
 			} ],				
-			"options" : {
+			"options": {
+				"impreciseInput": false,
 				"arrowThickness": 12,
 				"arrowLength": 95,
 				"canvasFuzzyHeight": 150,
@@ -64,69 +61,27 @@ function Arrow(canvas, element, configuration) {
 			}
 	};
 
-	/**
-	 * Initializes the arrow
-	 */
-	this.initialize = function(userConfiguration) {
-		// Generates the configuration
-		var configuration = new Configuration(this, userConfiguration);	
-		
-		return configuration.configuration;
-	}
-
-	// Initializes the arrow and sets the configuration
-	this.configuration = this.initialize(configuration);	
-
-	/**
-	 * Renders the arrow
-	 */
-	this.render = function() {				
-		if (this.canvas.getContext) {
-			this.draw(this.element.value);
-		}
-		if (this.fuzzy.canvasFuzzy !== null) {
-			this.fuzzy.drawFuzzyPartition();
-		}
-	}
-	
-	/**
-	 * Manages the doubleClick event
-	 */
-	this.doubleClickEventManager = function() {
-		if (self.fuzzy.canvasFuzzy === null) {
-			self.fuzzy.drawFuzzyPartition();
-		} else {
-			self.canvas.parentNode.removeChild(self.fuzzy.canvasFuzzy);
-			self.fuzzy.canvasFuzzy = null;
-		}
-	} 
+	// Sets the configuration manager
+	this.configurationManager = new ConfigurationManager(this, configuration);
 		
 	/**
-	 * Draws the arrow
+	 * Draws the arrow for the linguistic fuzzy input xFuzzy
 	 */
-	this.draw = function(x) {
-		var color = [];
-		var smile;
-		var size = this.canvas.width;
-		var context = this.canvas.getContext("2d");
-
-		// Creates the fuzzy object and set the imput
-		this.fuzzy = new Fuzzy(this);
-		this.fuzzy.fuzzyInput = x;
-
-		// Fuzzifies the value
-		var xFuzzy = this.fuzzy.fuzzyDescription(x, this.configuration.fuzzyPartition);
+	this.draw = function(xFuzzy, canvas) {
+		var size = canvas.width;
+		var context = canvas.getContext("2d");
+		var configuration = this.configurationManager.configuration;
 
 		// Gets the color and the smile
-		color = this.fuzzy.defuzzify(xFuzzy, this.configuration.colorPrototypes);
-		angle = this.fuzzy.defuzzify(xFuzzy, this.configuration.anglePrototypes);		
+		var color = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.colorPrototypes);
+		var angle = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.anglePrototypes);		
 			
 		// Clears the canvas
 		context.clearRect(0, 0, size, size);
 		
 		// Draws the arrow
-		var arrowLength = this.configuration.options.arrowLength;
-		var arrowThickness = this.configuration.options.arrowThickness;
+		var arrowLength = configuration.options.arrowLength;
+		var arrowThickness = configuration.options.arrowThickness;
 		var u = arrowThickness;
 		var v = size/2;
 		var theta = -angle * Math.PI / 180;
@@ -137,7 +92,7 @@ function Arrow(canvas, element, configuration) {
 		context.translate(v*Math.sin(theta) + u*Math.cos(theta), v*Math.cos(theta) - u*Math.sin(theta) - size/2);
 		context.fillStyle = "rgb(" + Math.round(color[0]) + "," + Math.round(color[1]) + "," + Math.round(color[2]) + ")";
 		context.moveTo(u, v);
-		context.lineTo(u, v - this.configuration.options.arrowThickness);
+		context.lineTo(u, v - configuration.options.arrowThickness);
 		context.lineTo(u + arrowLength-2*arrowThickness, size/2 - arrowThickness);
 		context.lineTo(u + arrowLength-2*arrowThickness, size/2 - 2*arrowThickness);
 		context.lineTo(u + arrowLength, size/2);
@@ -148,7 +103,7 @@ function Arrow(canvas, element, configuration) {
 		context.fill();
 		context.restore();
 		context.stroke();
-	}
+	}	
 }
 
 /**
@@ -160,227 +115,186 @@ function Arrow(canvas, element, configuration) {
  * @returns void
  */
 function SunCloud(canvas, element, configuration) {
-	// Variables
-	var self = this;
-	
 	// Attributes
 	this.canvas = document.getElementById(canvas);
 	this.element = document.getElementById(element);
-	this.fuzzy = {};
 	this.defaultConfiguration = {		
-			"fuzzyPartition" : [ {
-				"bounds" : [ 0, 0, 0, 25 ],
-				"color" : [ 255, 0, 0 ],
-				"label" : "VL"
+			"fuzzyPartition": [ {
+				"bounds": [ 0, 0, 0, 25 ],
+				"color": [ 255, 0, 0 ],
+				"label": "VL"
 			}, {
-				"bounds" : [ 0, 25, 25, 50 ],
-				"color" : [ 255, 128, 0 ],
-				"label" : "L"
+				"bounds": [ 0, 25, 25, 50 ],
+				"color": [ 255, 128, 0 ],
+				"label": "L"
 			}, {
-				"bounds" : [ 25, 50, 50, 75 ],
-				"color" : [ 255, 255, 0 ],
-				"label" : "N"
+				"bounds": [ 25, 50, 50, 75 ],
+				"color": [ 255, 255, 0 ],
+				"label": "N"
 			}, {
-				"bounds" : [ 50, 75, 75, 100 ],
-				"color" : [ 128, 255, 0 ],
-				"label" : "R"		
+				"bounds": [ 50, 75, 75, 100 ],
+				"color": [ 128, 255, 0 ],
+				"label": "R"		
 			}, {
-				"bounds" : [ 75, 100, 100, 100 ],
-				"color" : [ 0, 255, 0 ],
-				"label" : "VR"					
+				"bounds": [ 75, 100, 100, 100 ],
+				"color": [ 0, 255, 0 ],
+				"label": "VR"					
 			} ],
-			"sunSizePrototypes" : [ {
-				"label" : "VL",
-				"prototype" : 0
+			"sunSizePrototypes": [ {
+				"label": "VL",
+				"prototype": 0
 			}, {
-				"label" : "L",
-				"prototype" : 0
+				"label": "L",
+				"prototype": 0
 			}, {
-				"label" : "N",
-				"prototype" : 30
+				"label": "N",
+				"prototype": 30
 			}, {
-				"label" : "R",
-				"prototype" : 35
+				"label": "R",
+				"prototype": 35
 			}, {
-				"label" : "VR",
-				"prototype" : 40		
+				"label": "VR",
+				"prototype": 40		
 			} ],
-			"sunPositionPrototypes" : [ {
-				"label" : "VL",
-				"prototype" : [0, 0]
+			"sunPositionPrototypes": [ {
+				"label": "VL",
+				"prototype": [0, 0]
 			}, {
-				"label" : "L",
-				"prototype" : [0, 0]
+				"label": "L",
+				"prototype": [0, 0]
 			}, {
-				"label" : "N",
-				"prototype" : [0, 0]
+				"label": "N",
+				"prototype": [0, 0]
 			}, {
-				"label" : "R",
-				"prototype" : [0, 0]
+				"label": "R",
+				"prototype": [0, 0]
 			}, {
-				"label" : "VR",
-				"prototype" : [0, 0]			
+				"label": "VR",
+				"prototype": [0, 0]			
 			} ],
-			"sunColorPrototypes" : [ {
-				"label" : "VL",
-				"prototype" : [ 255, 255, 255 ]
+			"sunColorPrototypes": [ {
+				"label": "VL",
+				"prototype": [ 255, 255, 255 ]
 			}, {
-				"label" : "L",
-				"prototype" : [ 255, 128, 0 ]
+				"label": "L",
+				"prototype": [ 255, 128, 0 ]
 			}, {
-				"label" : "N",
-				"prototype" : [ 204, 204, 0 ]
+				"label": "N",
+				"prototype": [ 204, 204, 0 ]
 			}, {
-				"label" : "R",
-				"prototype" : [ 230, 230, 0 ]
+				"label": "R",
+				"prototype": [ 230, 230, 0 ]
 			}, {
-				"label" : "VR",
-				"prototype" : [ 255, 255, 0 ]			
+				"label": "VR",
+				"prototype": [ 255, 255, 0 ]			
 			} ],	
-			"sunraySizePrototypes" : [ {
-				"label" : "VL",
-				"prototype" : 0
+			"sunraySizePrototypes": [ {
+				"label": "VL",
+				"prototype": 0
 			}, {
-				"label" : "L",
-				"prototype" : 0
+				"label": "L",
+				"prototype": 0
 			}, {
-				"label" : "N",
-				"prototype" : 0.8
+				"label": "N",
+				"prototype": 0.8
 			}, {
-				"label" : "R",
-				"prototype" : 1.0
+				"label": "R",
+				"prototype": 1.0
 			}, {
-				"label" : "VR",
-				"prototype" : 1.3				
+				"label": "VR",
+				"prototype": 1.3				
 			} ],			
-			"cloudSizePrototypes" : [ {
-				"label" : "VL",
-				"prototype" : 1.3
+			"cloudSizePrototypes": [ {
+				"label": "VL",
+				"prototype": 1.3
 			}, {
-				"label" : "L",
-				"prototype" : 1
+				"label": "L",
+				"prototype": 1
 			}, {
-				"label" : "N",
-				"prototype" : 0.8
+				"label": "N",
+				"prototype": 0.8
 			}, {
-				"label" : "R",
-				"prototype" : 0
+				"label": "R",
+				"prototype": 0
 			}, {
-				"label" : "VR",
-				"prototype" : 0				
+				"label": "VR",
+				"prototype": 0				
 			} ],
-			"cloudPositionPrototypes" : [ {
-				"label" : "VL",
-				"prototype" : [-50, 0]
+			"cloudPositionPrototypes": [ {
+				"label": "VL",
+				"prototype": [-50, 0]
 			}, {
-				"label" : "L",
-				"prototype" : [-15, 0]
+				"label": "L",
+				"prototype": [-15, 0]
 			}, {
-				"label" : "N",
-				"prototype" : [0, 0]
+				"label": "N",
+				"prototype": [0, 0]
 			}, {
-				"label" : "R",
-				"prototype" : [5, 0]
+				"label": "R",
+				"prototype": [5, 0]
 			}, {
-				"label" : "VR",
-				"prototype" : [5, 0]			
+				"label": "VR",
+				"prototype": [5, 0]			
 			} ],
-			"cloudColorPrototypes" : [ {
-				"label" : "VL",
-				"prototype" : [ 25, 25, 25 ]
+			"cloudColorPrototypes": [ {
+				"label": "VL",
+				"prototype": [ 25, 25, 25 ]
 			}, {
-				"label" : "L",
-				"prototype" : [ 127, 127, 127 ]
+				"label": "L",
+				"prototype": [ 127, 127, 127 ]
 			}, {
-				"label" : "N",
-				"prototype" : [ 192, 192, 192 ]
+				"label": "N",
+				"prototype": [ 192, 192, 192 ]
 			}, {
-				"label" : "R",
-				"prototype" : [ 255, 255, 255 ]
+				"label": "R",
+				"prototype": [ 255, 255, 255 ]
 			}, {
-				"label" : "VR",
-				"prototype" : [ 255, 255, 255 ]			
+				"label": "VR",
+				"prototype": [ 255, 255, 255 ]			
 			} ],
-			"rainLevelPrototypes" : [ {
-				"label" : "VL",
-				"prototype" : 10
+			"rainLevelPrototypes": [ {
+				"label": "VL",
+				"prototype": 10
 			}, {
-				"label" : "L",
-				"prototype" : 7
+				"label": "L",
+				"prototype": 7
 			}, {
-				"label" : "N",
-				"prototype" : 0
+				"label": "N",
+				"prototype": 0
 			}, {
-				"label" : "R",
-				"prototype" : 0
+				"label": "R",
+				"prototype": 0
 			}, {
-				"label" : "VR",
-				"prototype" : 0				
+				"label": "VR",
+				"prototype": 0				
 			} ],			
-			"options" : {
+			"options": {
+				"impreciseInput": false,
+				"canvasFuzzyHeight": 150,
+				"canvasFuzzyWidth": 400				
 			}
 	};
-	
+
+	// Sets the configuration manager
+	this.configurationManager = new ConfigurationManager(this, configuration);
+		
 	/**
-	 * Initializes the sun/cloud
+	 * Draws the sun/cloud for the linguistic fuzzy input xFuzzy
 	 */
-	this.initialize = function(userConfiguration) {
-		// Generates the configuration
-		var configuration = new Configuration(this, userConfiguration);	
-	
-		return configuration.configuration;
-	}
-
-	// Initializes the sun/cloud and sets the configuration
-	this.configuration = this.initialize(configuration);	
-
-	/**
-	 * Renders the sun/cloud
-	 */
-	this.render = function() {				
-		if (this.canvas.getContext) {
-			this.draw(this.element.value);
-		}
-		if (this.fuzzy.canvasFuzzy !== null) {
-			this.fuzzy.drawFuzzyPartition();
-		}
-	}
-
-	/**
-	 * Manages the doubleClick event
-	 */
-	this.doubleClickEventManager = function() {
-		if (self.fuzzy.canvasFuzzy === null) {
-			self.fuzzy.drawFuzzyPartition();
-		} else {
-			self.canvas.parentNode.removeChild(self.fuzzy.canvasFuzzy);
-			self.fuzzy.canvasFuzzy = null;
-		}
-	} 
-	
-	/**
-	 * Draws the sun/cloud
-	 */
-	this.draw = function(x) {
-		var size = this.canvas.width;
-		var context = this.canvas.getContext("2d");
-
-		// Creates the fuzzy object and set the imput
-		this.fuzzy = new Fuzzy(this);
-		this.fuzzy.fuzzyInput = x;
-
-		// Fuzzifies the value
-		var xFuzzy = this.fuzzy.fuzzyDescription(x, this.configuration.fuzzyPartition);
-
+	this.draw = function(xFuzzy, canvas) {
+		var size = canvas.width;
+		var context = canvas.getContext("2d");
+		var configuration = this.configurationManager.configuration;
+		
 		// Gets the color and the smile
-		var sunSize = this.fuzzy.defuzzify(xFuzzy, this.configuration.sunSizePrototypes);
-		var sunPosition = this.fuzzy.defuzzify(xFuzzy, this.configuration.sunPositionPrototypes);
-		var sunColor = this.fuzzy.defuzzify(xFuzzy, this.configuration.sunColorPrototypes);
-		var sunraySize = this.fuzzy.defuzzify(xFuzzy, this.configuration.sunraySizePrototypes);
-		var cloudSize = this.fuzzy.defuzzify(xFuzzy, this.configuration.cloudSizePrototypes);
-		var cloudPosition = this.fuzzy.defuzzify(xFuzzy, this.configuration.cloudPositionPrototypes);
-		var cloudColor = this.fuzzy.defuzzify(xFuzzy, this.configuration.cloudColorPrototypes);
-		var rainLevel = this.fuzzy.defuzzify(xFuzzy, this.configuration.rainLevelPrototypes);
+		var sunSize = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.sunSizePrototypes);
+		var sunPosition = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.sunPositionPrototypes);
+		var sunColor = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.sunColorPrototypes);
+		var sunraySize = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.sunraySizePrototypes);
+		var cloudSize = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.cloudSizePrototypes);
+		var cloudPosition = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.cloudPositionPrototypes);
+		var cloudColor = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.cloudColorPrototypes);
+		var rainLevel = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.rainLevelPrototypes);
 		
 		// Clears the canvas
 		context.clearRect(0, 0, size, size);
@@ -490,88 +404,85 @@ function SunCloud(canvas, element, configuration) {
  * @returns void
  */
 function Emoticon(canvas, element, configuration) {
-	// Variables
-	var self = this;
-	
 	// Attributes
 	this.canvas = document.getElementById(canvas);
 	this.element = document.getElementById(element);
-	this.fuzzy = {};
 	this.defaultConfiguration = {
-			"fuzzyPartition" : [ {
-				"bounds" : [ 0, 0, 15, 50 ],
-				"color" : [ 255, 0, 0 ],
-				"label" : "U"
+			"fuzzyPartition": [ {
+				"bounds": [ 0, 0, 15, 50 ],
+				"color": [ 255, 0, 0 ],
+				"label": "U"
 			}, {
-				"bounds" : [ 15, 50, 55, 90 ],
-				"color" : [ 255, 255, 0 ],
-				"label" : "N"
+				"bounds": [ 15, 50, 55, 90 ],
+				"color": [ 255, 255, 0 ],
+				"label": "N"
 			}, {
-				"bounds" : [ 55, 90, 100, 100 ],
-				"color" : [ 0, 255, 0 ],
-				"label" : "S"
+				"bounds": [ 55, 90, 100, 100 ],
+				"color": [ 0, 255, 0 ],
+				"label": "S"
 			} ],
-			"colorPrototypes" : [ {
-				"label" : "U",
-				"prototype" : [ 255, 0, 0 ]
+			"colorPrototypes": [ {
+				"label": "U",
+				"prototype": [ 255, 0, 0 ]
 			}, {
-				"label" : "N",
-				"prototype" : [ 255, 255, 0 ]
+				"label": "N",
+				"prototype": [ 255, 255, 0 ]
 			}, {
-				"label" : "S",
-				"prototype" : [ 0, 255, 0 ]
+				"label": "S",
+				"prototype": [ 0, 255, 0 ]
 			} ],	
-			"gradientPrototypes" : [ {
-				"label" : "U",
-				"prototype" : 0
+			"gradientPrototypes": [ {
+				"label": "U",
+				"prototype": 0
 			}, {
-				"label" : "N",
-				"prototype" : 0.3*this.canvas.height
+				"label": "N",
+				"prototype": 0.3*this.canvas.height
 			}, {
-				"label" : "S",
-				"prototype" : 0.9*this.canvas.height
+				"label": "S",
+				"prototype": 0.9*this.canvas.height
 			} ],				
-			"smilePrototypes" : [ {
-				"label" : "U",
-				"prototype" : -0.5
+			"smilePrototypes": [ {
+				"label": "U",
+				"prototype": -0.5
 			}, {
-				"label" : "N",
-				"prototype" : 0
+				"label": "N",
+				"prototype": 0
 			}, {
-				"label" : "S",
-				"prototype" : 1
+				"label": "S",
+				"prototype": 1
 			} ],
-			"secondSmilePrototypes" : [ {
-				"label" : "U",
-				"prototype" : -0.5
+			"secondSmilePrototypes": [ {
+				"label": "U",
+				"prototype": -0.5
 			}, {
-				"label" : "N",
-				"prototype" : 0
+				"label": "N",
+				"prototype": 0
 			}, {
-				"label" : "S",
-				"prototype" : 1
+				"label": "S",
+				"prototype": 1
 			} ],			
-			"eyesSizePrototypes" : [ {
-				"label" : "U",
-				"prototype" : 1
+			"eyesSizePrototypes": [ {
+				"label": "U",
+				"prototype": 1
 			}, {
-				"label" : "N",
-				"prototype" : 1
+				"label": "N",
+				"prototype": 1
 			}, {
-				"label" : "S",
-				"prototype" : 1
+				"label": "S",
+				"prototype": 1
 			} ],	
-			"eyebrowsPrototypes" : [ {
-				"label" : "U",
-				"prototype" : 0.33
+			"eyebrowsPrototypes": [ {
+				"label": "U",
+				"prototype": 0.33
 			}, {
-				"label" : "N",
-				"prototype" : 0.35
+				"label": "N",
+				"prototype": 0.35
 			}, {
-				"label" : "S",
-				"prototype" : 0.38
+				"label": "S",
+				"prototype": 0.38
 			} ],				
-			"options" : {
+			"options": {
+				"impreciseInput": false,
 				"eyeWidthToSizeRatio": 0.08,
 				"eyeHeightToWidthRatio": 1.5,
 				"eyeXPositionToSizeRatio": 0.2,
@@ -597,80 +508,34 @@ function Emoticon(canvas, element, configuration) {
 			}
 	};
 
-	/**
-	 * Initializes the emoticon
-	 */
-	this.initialize = function(userConfiguration) {
-		// Generates the configuration
-		var configuration = new Configuration(this, userConfiguration);	
-		
-		return configuration.configuration;
-	}
-
-	// Initializes the emoticon and sets the configuration
-	this.configuration = this.initialize(configuration);	
-
-	/**
-	 * Renders the emoticon
-	 */
-	this.render = function() {				
-		if (this.canvas.getContext) {
-			this.draw(this.element.value);
-		}
-		if (this.fuzzy.canvasFuzzy !== null) {
-			this.fuzzy.drawFuzzyPartition();
-		}
-	}
+	// Sets the configuration manager and the configuration
+	this.configurationManager = new ConfigurationManager(this, configuration);
 	
 	/**
-	 * Manages the doubleClick event
+	 * Draws the emoticon for the linguistic fuzzy input xFuzzy
 	 */
-	this.doubleClickEventManager = function() {
-		if (self.fuzzy.canvasFuzzy === null) {
-			self.fuzzy.drawFuzzyPartition();
-		} else {
-			self.canvas.parentNode.removeChild(self.fuzzy.canvasFuzzy);
-			self.fuzzy.canvasFuzzy = null;
-		}
-	} 
-		
-	/**
-	 * Draws the emoticon
-	 */
-	this.draw = function(x) {
-		var color = [];
-		var smile;
-		var secondSmile;
-		var eyesSize;
-		var gradientValue;
-		var eyebrows;
-		var size = this.canvas.width;
-		var context = this.canvas.getContext("2d");
+	this.draw = function(xFuzzy, canvas) {
+		var size = canvas.width;
+		var context = canvas.getContext("2d");
+		var configuration = this.configurationManager.configuration;
 
-		// Creates the fuzzy object and set the imput
-		this.fuzzy = new Fuzzy(this);
-		this.fuzzy.fuzzyInput = x;
-
-		// Fuzzifies the value
-		var xFuzzy = this.fuzzy.fuzzyDescription(x, this.configuration.fuzzyPartition);
-		
 		// Gets the color and the smile
-		color = this.fuzzy.defuzzify(xFuzzy, this.configuration.colorPrototypes);
-		smile = this.fuzzy.defuzzify(xFuzzy, this.configuration.smilePrototypes);
-		secondSmile = this.fuzzy.defuzzify(xFuzzy, this.configuration.secondSmilePrototypes);
-		eyesSize = this.fuzzy.defuzzify(xFuzzy, this.configuration.eyesSizePrototypes);
-		gradientValue = this.fuzzy.defuzzify(xFuzzy, this.configuration.gradientPrototypes); 
-		eyebrows =  this.fuzzy.defuzzify(xFuzzy, this.configuration.eyebrowsPrototypes); 
+		var color = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.colorPrototypes);
+		var smile = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.smilePrototypes);
+		var secondSmile = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.secondSmilePrototypes);
+		var eyesSize = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.eyesSizePrototypes);
+		var gradientValue = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.gradientPrototypes); 
+		var eyebrows =  this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.eyebrowsPrototypes); 
 			
 		// Sets the gradient
 		var gradient = context.createLinearGradient(0, 0, 0, gradientValue);
-		gradient.addColorStop(0, this.configuration.options.gradientColorBegin);	
-		gradient.addColorStop(1, this.configuration.options.gradientColorEnd);
+		gradient.addColorStop(0, configuration.options.gradientColorBegin);	
+		gradient.addColorStop(1, configuration.options.gradientColorEnd);
 
 		// Head
 		context.beginPath();		
 		context.fillStyle = "rgb(" + Math.round(color[0]) + "," + Math.round(color[1]) + "," + Math.round(color[2]) + ")";
-		if (this.configuration.options.gradient && gradientValue > 0) {
+		if (configuration.options.gradient && gradientValue > 0) {
 			context.fillStyle = gradient;
 		}
 		context.arc(size/2, size/2, size/2, 0, Math.PI * 2, true);
@@ -681,61 +546,61 @@ function Emoticon(canvas, element, configuration) {
 		// First smile
 		context.beginPath();
 		context.moveTo(
-				size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-				size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio))
-		;
-		if (this.configuration.options.smileCurve == "cubic") {
+				size*(1 - configuration.options.mouthLengthToSizeRatio)/2, 
+				size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
+		);
+		if (configuration.options.smileCurve == "cubic") {
 			context.bezierCurveTo(
-					size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smile), 
-					size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smile), 
-					size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
+					size*(1 - configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * smile), 
+					size*(1 + configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * smile), 
+					size*(1 + configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
 			);		
 		} else {
 			context.quadraticCurveTo(
 					size/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smile), 
-					size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * smile), 
+					size*(1 + configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
 			);		
 		}		
 		// Fills the mouth with a given color if required
-		if (this.configuration.options.mouthFill) {
-			context.fillStyle = this.configuration.options.mouthFillColor;	
+		if (configuration.options.mouthFill) {
+			context.fillStyle = configuration.options.mouthFillColor;	
 		}
 		context.fill();	
 		context.stroke();
 		context.closePath();
 		
 		// Second smile
-		if (this.configuration.options.secondSmile) {
+		if (configuration.options.secondSmile) {
 			context.beginPath();
 			context.moveTo(
-					size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio))
-			;
-			if (this.configuration.options.secondSmileCurve == "cubic") {
+					size*(1 - configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
+			);
+			if (configuration.options.secondSmileCurve == "cubic") {
 				context.bezierCurveTo(
-						size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmile), 
-						size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmile), 
-						size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
+						size*(1 - configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * secondSmile), 
+						size*(1 + configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * secondSmile), 
+						size*(1 + configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
 				);						
 			} else {
 				context.quadraticCurveTo(
 						size/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmile), 
-						size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * secondSmile), 
+						size*(1 + configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
 				);				
 			}
 			// Fills the mouth with a given color if required
-			if (this.configuration.options.mouthFill) {
-				context.fillStyle = this.configuration.options.mouthFillColor;			
+			if (configuration.options.mouthFill) {
+				context.fillStyle = configuration.options.mouthFillColor;			
 			}
 			context.fill();		
 			context.stroke();
@@ -743,21 +608,21 @@ function Emoticon(canvas, element, configuration) {
 		}
 
 		// Eyebrows
-		if (this.configuration.options.eyebrows) {		
+		if (configuration.options.eyebrows) {		
 			// Left eyebrow
 			context.save();
 			context.beginPath();
 			context.lineWidth = 2;
 			context.moveTo(
-					size/2 - (this.configuration.options.eyeXPositionToSizeRatio + this.configuration.options.eyeWidthToSizeRatio)*size, 
-					size/2 - this.configuration.options.leftEyeBrowLeftYPositionToSizeRatio*size
+					size/2 - (configuration.options.eyeXPositionToSizeRatio + configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - configuration.options.leftEyeBrowLeftYPositionToSizeRatio*size
 			);
 
 			context.quadraticCurveTo(
-					size/2 - this.configuration.options.eyeXPositionToSizeRatio*size, 
+					size/2 - configuration.options.eyeXPositionToSizeRatio*size, 
 					size/2 - eyebrows*size, 
-					size/2 - (this.configuration.options.eyeXPositionToSizeRatio - this.configuration.options.eyeWidthToSizeRatio)*size, 
-					size/2 - this.configuration.options.leftEyeBrowRightYPositionToSizeRatio*size
+					size/2 - (configuration.options.eyeXPositionToSizeRatio - configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - configuration.options.leftEyeBrowRightYPositionToSizeRatio*size
 			);	
 			context.stroke();
 			context.closePath();	
@@ -765,14 +630,14 @@ function Emoticon(canvas, element, configuration) {
 			// Right eyebrow
 			context.beginPath();
 			context.moveTo(
-					size/2 + (this.configuration.options.eyeXPositionToSizeRatio + this.configuration.options.eyeWidthToSizeRatio)*size, 
-					size/2 - this.configuration.options.leftEyeBrowLeftYPositionToSizeRatio*size
+					size/2 + (configuration.options.eyeXPositionToSizeRatio + configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - configuration.options.leftEyeBrowLeftYPositionToSizeRatio*size
 			);
 			context.quadraticCurveTo(
-					size/2 + this.configuration.options.eyeXPositionToSizeRatio*size, 
+					size/2 + configuration.options.eyeXPositionToSizeRatio*size, 
 					size/2 - eyebrows*size, 
-					size/2 + (this.configuration.options.eyeXPositionToSizeRatio - this.configuration.options.eyeWidthToSizeRatio)*size, 
-					size/2 - this.configuration.options.leftEyeBrowRightYPositionToSizeRatio*size
+					size/2 + (configuration.options.eyeXPositionToSizeRatio - configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - configuration.options.leftEyeBrowRightYPositionToSizeRatio*size
 			);	
 			context.stroke();
 			context.closePath();
@@ -782,22 +647,22 @@ function Emoticon(canvas, element, configuration) {
 		// Left eye
 		context.beginPath();
 		context.moveTo(
-				size/2 - this.configuration.options.eyeXPositionToSizeRatio*size, 
-				size/2 - this.configuration.options.eyeYPositionToSizeRatio*size
+				size/2 - configuration.options.eyeXPositionToSizeRatio*size, 
+				size/2 - configuration.options.eyeYPositionToSizeRatio*size
 		);
 		context.closePath();
 		context.save();
-		context.fillStyle = this.configuration.options.eyesFillColor;
+		context.fillStyle = configuration.options.eyesFillColor;
 		scaleWidth = 1.0;
-		scaleHeight = eyesSize*this.configuration.options.eyeHeightToWidthRatio;
-		if (this.configuration.options.eyesSizeScaled) {
+		scaleHeight = eyesSize*configuration.options.eyeHeightToWidthRatio;
+		if (configuration.options.eyesSizeScaled) {
 			scaleWidth = eyesSize;
 		}
 		context.scale(scaleWidth, scaleHeight);
 		context.arc(
-				(size/2 - this.configuration.options.eyeXPositionToSizeRatio*size)/scaleWidth, 
-				(size/2  - this.configuration.options.eyeYPositionToSizeRatio*size)/scaleHeight, 
-				this.configuration.options.eyeWidthToSizeRatio*size, 
+				(size/2 - configuration.options.eyeXPositionToSizeRatio*size)/scaleWidth, 
+				(size/2  - configuration.options.eyeYPositionToSizeRatio*size)/scaleHeight, 
+				configuration.options.eyeWidthToSizeRatio*size, 
 				0, Math.PI * 2, true
 		);
 		context.fill();		
@@ -806,22 +671,22 @@ function Emoticon(canvas, element, configuration) {
 		// Right eye
 		context.beginPath();
 		context.moveTo(
-				size/2 + this.configuration.options.eyeXPositionToSizeRatio*size, 
-				size/2 - this.configuration.options.eyeYPositionToSizeRatio*size
+				size/2 + configuration.options.eyeXPositionToSizeRatio*size, 
+				size/2 - configuration.options.eyeYPositionToSizeRatio*size
 		);
 		context.closePath();
 		context.save();
-		context.fillStyle = this.configuration.options.eyesFillColor;
+		context.fillStyle = configuration.options.eyesFillColor;
 		scaleWidth = 1.0;
-		scaleHeight = eyesSize*this.configuration.options.eyeHeightToWidthRatio;
-		if (this.configuration.options.eyesSizeScaled) {
+		scaleHeight = eyesSize*configuration.options.eyeHeightToWidthRatio;
+		if (configuration.options.eyesSizeScaled) {
 			scaleWidth = eyesSize;
 		}
 		context.scale(scaleWidth, scaleHeight);
 		context.arc(
-				(size/2 + this.configuration.options.eyeXPositionToSizeRatio*size)/scaleWidth, 
-				(size/2  - this.configuration.options.eyeYPositionToSizeRatio*size)/scaleHeight, 
-				this.configuration.options.eyeWidthToSizeRatio*size, 
+				(size/2 + configuration.options.eyeXPositionToSizeRatio*size)/scaleWidth, 
+				(size/2  - configuration.options.eyeYPositionToSizeRatio*size)/scaleHeight, 
+				configuration.options.eyeWidthToSizeRatio*size, 
 				0, Math.PI * 2, true
 		);		
 		context.fill();
@@ -838,92 +703,89 @@ function Emoticon(canvas, element, configuration) {
  * @returns void
  */
 function BiEmoticon(canvas, element, configuration) {
-	// Variables
-	var self = this;
-	
 	// Attributes
 	this.canvas = document.getElementById(canvas);
 	this.element = document.getElementById(element);
-	this.fuzzy = {};
 	this.defaultConfiguration = {
-			"fuzzyPartition" : [ {
-				"bounds" : [ 0, 0, 15, 50 ],
-				"color" : [ 255, 0, 0 ],
-				"label" : "U"
+			"fuzzyPartition": [ {
+				"bounds": [ 0, 0, 15, 50 ],
+				"color": [ 255, 0, 0 ],
+				"label": "U"
 			}, {
-				"bounds" : [ 15, 50, 55, 90 ],
-				"color" : [ 255, 255, 0 ],
-				"label" : "N"
+				"bounds": [ 15, 50, 55, 90 ],
+				"color": [ 255, 255, 0 ],
+				"label": "N"
 			}, {
-				"bounds" : [ 55, 90, 100, 100 ],
-				"color" : [ 0, 255, 0 ],
-				"label" : "S"
+				"bounds": [ 55, 90, 100, 100 ],
+				"color": [ 0, 255, 0 ],
+				"label": "S"
 			} ],
-			"colorPrototypes" : [ {
-				"label" : "U",
-				"prototype" : [ 255, 0, 0 ]
+			"colorPrototypes": [ {
+				"label": "U",
+				"prototype": [ 255, 0, 0 ]
 			}, {
-				"label" : "N",
-				"prototype" : [ 255, 255, 0 ]
+				"label": "N",
+				"prototype": [ 255, 255, 0 ]
 			}, {
-				"label" : "S",
-				"prototype" : [ 0, 255, 0 ]
+				"label": "S",
+				"prototype": [ 0, 255, 0 ]
 			} ],
-			"gradientPrototypes" : [ {
-				"label" : "U",
-				"prototype" : 0
+			"gradientPrototypes": [ {
+				"label": "U",
+				"prototype": 0
 			}, {
-				"label" : "N",
-				"prototype" : 0.3*this.canvas.height
+				"label": "N",
+				"prototype": 0.3*this.canvas.height
 			}, {
-				"label" : "S",
-				"prototype" : 0.9*this.canvas.height
+				"label": "S",
+				"prototype": 0.9*this.canvas.height
 			} ],				
-			"smilePrototypes" : [ {
-				"label" : "U",
-				"prototype" : -0.5
+			"smilePrototypes": [ {
+				"label": "U",
+				"prototype": -0.5
 			}, {
-				"label" : "N",
-				"prototype" : 0
+				"label": "N",
+				"prototype": 0
 			}, {
-				"label" : "S",
-				"prototype" : 1
+				"label": "S",
+				"prototype": 1
 			} ],
-			"secondSmilePrototypes" : [ {
-				"label" : "U",
-				"prototype" : -0.5
+			"secondSmilePrototypes": [ {
+				"label": "U",
+				"prototype": -0.5
 			}, {
-				"label" : "N",
-				"prototype" : 0
+				"label": "N",
+				"prototype": 0
 			}, {
-				"label" : "S",
-				"prototype" : 1
+				"label": "S",
+				"prototype": 1
 			} ],						
-			"eyesSizePrototypes" : [ {
-				"label" : "U",
-				"prototype" : 1
+			"eyesSizePrototypes": [ {
+				"label": "U",
+				"prototype": 1
 			}, {
-				"label" : "N",
-				"prototype" : 1
+				"label": "N",
+				"prototype": 1
 			}, {
-				"label" : "S",
-				"prototype" : 1
+				"label": "S",
+				"prototype": 1
 			} ],	
-			"eyebrowsPrototypes" : [ {
-				"label" : "U",
-				"prototype" : 0.33
+			"eyebrowsPrototypes": [ {
+				"label": "U",
+				"prototype": 0.33
 			}, {
-				"label" : "N",
-				"prototype" : 0.35
+				"label": "N",
+				"prototype": 0.35
 			}, {
-				"label" : "S",
-				"prototype" : 0.38
+				"label": "S",
+				"prototype": 0.38
 			} ],
-			"options" : {
-				"eyeWidthToSizeRatio" : 0.08,
-				"eyeHeightToWidthRatio" : 1.5,
-				"eyeXPositionToSizeRatio" : 0.2,
-				"eyeYPositionToSizeRatio" : 0.1,
+			"options": {
+				"impreciseInput": false,
+				"eyeWidthToSizeRatio": 0.08,
+				"eyeHeightToWidthRatio": 1.5,
+				"eyeXPositionToSizeRatio": 0.2,
+				"eyeYPositionToSizeRatio": 0.1,
 				"eyesFillColor": "black",
 				"eyesSizeScaled": false,
 				"eyebrows": false,
@@ -949,58 +811,433 @@ function BiEmoticon(canvas, element, configuration) {
 	this.dashSize = 3;
 	this.rightButtonDown = false;
 	
-	/**
-	 * Initializes the bi-emoticon
-	 */
-	this.initialize = function(userConfiguration) {
+	// Sets the configuration manager and the configuration
+	this.configurationManager = new ConfigurationManager(this, configuration);
 		
-		// Generates the configuration
-		var configuration = new Configuration(this, userConfiguration);	
-		
-		// Sets the thumb width
-		this.sliderThumbWidth = configuration.configuration.options.sliderThumbWidth;
-		var style = document.createElement("style");
-		style.setAttribute("id", "sliderStyle_" + this.element.id);
-		document.head.append(style);
-		document.getElementById("sliderStyle_" + this.element.id).innerHTML = "." + this.element.id + "::-moz-range-thumb {width: " + this.sliderThumbWidth + "%;}";
-		document.getElementById("sliderStyle_" + this.element.id).innerHTML += "." + this.element.id + "::-webkit-slider-thumb {width: " + this.sliderThumbWidth + "%;}";
-		document.getElementById("sliderStyle_" + this.element.id).innerHTML += "." + this.element.id + "::-ms-thumb {width: " + Math.round(this.sliderThumbWidth*this.element.offsetWidth/100) + "px;}";
-
-		// Adds the slider id as an additional class to the slider
-		this.element.classList.add(this.element.id);		
-			
-		// Adds the Eventlistener "wheel" to change the size of the cursor
-	    if (this.element.addEventListener) {
-	    	this.element.addEventListener("mousewheel", function(event) {self.wheelEventManager(event)}, false); //IE9, Chrome, Safari, Oper
-	    	this.element.addEventListener("wheel", function(event) {self.wheelEventManager(event)}, false); //Firefox
-	    } else {
-	    	this.element.attachEvent("onmousewheel", function(event) {self.wheelEventManager(event)}); //IE 6/7/8
-	    }
-		
-	    // Adds the EventListeners "mousedown" and mouseup
-	    this.element.addEventListener("mousedown", function(event) {self.rightButtonDown = true;});
-	    this.element.addEventListener("mouseup", function(event) {self.rightButtonDown = false;});
-	    
-		// Adds the EventListener "click" to visualize left or right side of the bi-emoticon
-		this.canvas.addEventListener("click", function() {self.clickEventManager(event)}, false);	
-		
-		return configuration.configuration;	
-	}
-	
-	// Initializes the emoticon and sets the configuration
-	this.configuration = this.initialize(configuration);	
-
 	/**
 	 * Renders the bi-emoticon
 	 */
-	this.render = function() {				
-		if (this.canvas.getContext) {
-			var x = (100 - this.sliderThumbWidth) * this.element.value/100 + this.sliderThumbWidth/2;			
-			this.draw([x - this.sliderThumbWidth/2, x, x, x + this.sliderThumbWidth/2]);
+	this.render = function() {			
+		var xFuzzy = this.configurationManager.fuzzy.fuzzyInputProcessing();
+		this.draw(xFuzzy, this.canvas);
+
+		if (this.configurationManager.fuzzy.canvasFuzzy !== null) {
+			this.configurationManager.fuzzy.drawFuzzyPartition();
 		}
-		if (this.fuzzy.canvasFuzzy !== null) {
-			this.fuzzy.drawFuzzyPartition();	
+	}
+	
+	/**
+	 * Draws the bi-emoticon for the linguistic fuzzy input xFuzzy
+	 */
+	this.draw = function(xFuzzy) {		
+		var size = this.canvas.width;
+		var context = this.canvas.getContext('2d');
+		var configuration = this.configurationManager.configuration;
+	
+		// Gets the color and the smile for the lower bound
+		var colorLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.colorPrototypes);
+		var smileLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.smilePrototypes);
+		var secondSmileLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.secondSmilePrototypes);
+		var eyesSizeLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.eyesSizePrototypes);
+		var gradientValueLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.gradientPrototypes); 
+		var eyebrowsLower =  this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.eyebrowsPrototypes); 
+
+		// Gets the color and the smile for the upper bound
+		var colorUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.colorPrototypes);
+		var smileUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.smilePrototypes);
+		var secondSmileUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.secondSmilePrototypes);
+		var eyesSizeUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.eyesSizePrototypes);
+		var gradientValueUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.gradientPrototypes); 
+		var eyebrowsUpper =  this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.eyebrowsPrototypes); 		
+		
+		// Sets the gradient
+		var gradientLower = context.createLinearGradient(0, 0, 0, gradientValueLower);
+		gradientLower.addColorStop(0, configuration.options.gradientColorBegin);	
+		gradientLower.addColorStop(1, configuration.options.gradientColorEnd);
+		var gradientUpper = context.createLinearGradient(0, 0, 0, gradientValueUpper);
+		gradientUpper.addColorStop(0, configuration.options.gradientColorBegin);	
+		gradientUpper.addColorStop(1, configuration.options.gradientColorEnd);		
+		
+		// Left part of the Head
+		context.beginPath();	
+		context.fillStyle = "rgb(" + Math.round(colorLower[0]) + "," + Math.round(colorLower[1]) + "," + Math.round(colorLower[2]) + ")";
+		if (configuration.options.gradient && gradientValueLower > 0) {
+			context.fillStyle = gradientLower;
 		}
+		context.arc(size/2, size/2, size/2, this.leftStartAngle, this.leftEndAngle, false);
+		context.fill();	
+		context.closePath();
+
+		// Right part of the Head
+		context.beginPath();		
+		context.fillStyle = "rgb(" + Math.round(colorUpper[0]) + "," + Math.round(colorUpper[1]) + "," + Math.round(colorUpper[2])	+ ")";
+		if (configuration.options.gradient && gradientValueUpper> 0) {
+			context.fillStyle = gradientUpper;
+		}
+		context.arc(size/2, size/2, size/2, this.rightStartAngle, this.rightEndAngle, true);
+		context.fill();	
+		context.closePath();			
+
+		// Mouth	
+		// Left part lower Mouth
+		if (this.leftEndAngle != 0) {		
+			context.beginPath();
+			context.moveTo(
+					size*(1 - configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
+			);
+			context.closePath();
+			context.quadraticCurveTo(
+					size*(1.2 - configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * smileLower), 
+					size/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * smileLower)
+			);
+			context.stroke();
+			// Right part lower Mouth
+			context.beginPath();
+			context.moveTo(
+					size/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * smileLower)
+			);	
+			context.closePath();
+			context.save();
+			context.setLineDash([this.dashSize, this.dashSize]);	
+			context.quadraticCurveTo(
+					size*(0.8 + configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * smileLower),
+					size*(1 + configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
+			);		
+			context.stroke();
+			
+			// Second smile
+			if (configuration.options.secondSmile) {
+				context.beginPath();
+				context.moveTo(
+						size*(1 - configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
+				);
+				context.closePath();
+				context.quadraticCurveTo(
+						size*(1.2 - configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * secondSmileLower), 
+						size/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * secondSmileLower)
+				);
+				context.stroke();
+				// Right part lower Mouth
+				context.beginPath();
+				context.moveTo(
+						size/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * secondSmileLower)
+				);	
+				context.closePath();
+				context.save();
+				context.setLineDash([this.dashSize, this.dashSize]);	
+				context.quadraticCurveTo(
+						size*(0.8 + configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * secondSmileLower),
+						size*(1 + configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
+				);		
+				context.stroke();	
+				context.restore();
+			}			
+		}
+		
+		// Left part upper Mouth
+		if (this.rightEndAngle != 0) {		
+			context.beginPath();
+			context.moveTo(
+					size*(1 - configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
+			);
+			context.closePath();
+			context.quadraticCurveTo(
+					size*(1.2 - configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * smileUpper), 
+					size/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * smileUpper)
+			);
+			context.stroke();
+			// Right part upper Mouth
+			context.restore();
+			context.beginPath();
+			context.moveTo(
+					size/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * smileUpper)
+			);	
+			context.closePath();
+			context.quadraticCurveTo(
+					size*(0.8 + configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * smileUpper),
+					size*(1 + configuration.options.mouthLengthToSizeRatio)/2, 
+					size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
+			);		
+			context.stroke();
+			
+			// Second smile
+			if (configuration.options.secondSmile) {
+				context.beginPath();
+				context.moveTo(
+						size*(1 - configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
+				);
+				context.closePath();
+				context.quadraticCurveTo(
+						size*(1.2 - configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * secondSmileUpper), 
+						size/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * secondSmileUpper)
+				);
+				context.stroke();
+				// Right part upper Mouth
+				context.restore();
+				context.beginPath();
+				context.moveTo(
+						size/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * secondSmileUpper)
+				);	
+				context.closePath();
+				context.quadraticCurveTo(
+						size*(0.8 + configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio + configuration.options.smileToSizeRatio * secondSmileUpper),
+						size*(1 + configuration.options.mouthLengthToSizeRatio)/2, 
+						size*(1/2 + configuration.options.mouthYPositionToSizeRatio)
+				);		
+				context.stroke();
+				context.restore();
+			}			
+		}
+		
+		// Eyebrows
+		if (this.leftEndAngle == 0) {	
+			eyebrowsLower = eyebrowsUpper;
+		}
+		if (this.rightEndAngle == 0) {	
+			eyebrowsUpper = eyebrowsLower;
+		}
+		if (configuration.options.eyebrows) {		
+			// Left eyebrow
+			context.save();
+			context.beginPath();
+			context.lineWidth = 2;
+			context.moveTo(
+					size/2 - (configuration.options.eyeXPositionToSizeRatio + configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - configuration.options.leftEyeBrowLeftYPositionToSizeRatio*size
+			);
+
+			context.quadraticCurveTo(
+					size/2 - configuration.options.eyeXPositionToSizeRatio*size, 
+					size/2 - eyebrowsLower*size, 
+					size/2 - (configuration.options.eyeXPositionToSizeRatio - configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - configuration.options.leftEyeBrowRightYPositionToSizeRatio*size
+			);	
+			context.stroke();
+			context.closePath();	
+			
+			// Right eyebrow
+			context.beginPath();
+			context.moveTo(
+					size/2 + (configuration.options.eyeXPositionToSizeRatio + configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - configuration.options.leftEyeBrowLeftYPositionToSizeRatio*size
+			);
+			context.quadraticCurveTo(
+					size/2 + configuration.options.eyeXPositionToSizeRatio*size, 
+					size/2 - eyebrowsUpper*size, 
+					size/2 + (configuration.options.eyeXPositionToSizeRatio - configuration.options.eyeWidthToSizeRatio)*size, 
+					size/2 - configuration.options.leftEyeBrowRightYPositionToSizeRatio*size
+			);	
+			context.stroke();
+			context.closePath();
+			context.restore();
+		}
+		
+		// Eyes
+		if (this.leftEndAngle == 0) {	
+			eyesSizeLower = eyesSizeUpper;
+		}
+		if (this.rightEndAngle == 0) {	
+			eyesSizeUpper = eyesSizeLower;
+		}
+		// Left eye
+		context.beginPath();
+		context.moveTo(
+				size/2 - configuration.options.eyeXPositionToSizeRatio*size, 
+				size/2 - configuration.options.eyeYPositionToSizeRatio*size
+		);
+		context.closePath();
+		context.save();
+		context.fillStyle = configuration.options.eyesFillColor;		
+		scaleWidth = 1.0;
+		scaleHeight = eyesSizeLower*configuration.options.eyeHeightToWidthRatio;
+		if (configuration.options.eyesSizeScaled) {
+			scaleWidth = eyesSizeLower;
+		}
+		context.scale(scaleWidth, scaleHeight);
+		context.arc(
+				(size/2 - configuration.options.eyeXPositionToSizeRatio*size)/scaleWidth, 
+				(size/2  - configuration.options.eyeYPositionToSizeRatio*size)/scaleHeight, 
+				configuration.options.eyeWidthToSizeRatio*size, 
+				0, Math.PI * 2, true
+		);
+		context.fill();		
+		context.restore();
+		
+		// Right eye
+		context.beginPath();
+		context.moveTo(
+				size/2 + configuration.options.eyeXPositionToSizeRatio*size, 
+				size/2 - configuration.options.eyeYPositionToSizeRatio*size
+		);
+		context.closePath();
+		context.save();
+		context.fillStyle = configuration.options.eyesFillColor;
+		scaleWidth = 1.0;
+		scaleHeight = eyesSizeUpper*configuration.options.eyeHeightToWidthRatio;
+		if (configuration.options.eyesSizeScaled) {
+			scaleWidth = eyesSizeUpper;
+		}
+		context.scale(scaleWidth, scaleHeight);
+		context.arc(
+				(size/2 + configuration.options.eyeXPositionToSizeRatio*size)/scaleWidth, 
+				(size/2  - configuration.options.eyeYPositionToSizeRatio*size)/scaleHeight, 
+				configuration.options.eyeWidthToSizeRatio*size, 
+				0, Math.PI * 2, true
+		);		
+		context.fill();
+		context.restore();
+	}
+}
+
+/**
+ * Configuration Manager
+ * 
+ * @returns void
+ */
+function ConfigurationManager(parentObject, userConfiguration) {	
+	// Properties
+	this.parentObject = parentObject;
+	this.canvas = parentObject.canvas;
+	this.element = parentObject.element;
+	this.canvasAlt = {};
+	this.configuration = {};
+	this.fuzzy = {};
+	this.sliderThumbWidth = 10;
+	this.rightButtonDown = false;
+	this.canvasDisplayed = true;
+	this.canvasAltDisplayed = true;
+	
+	// Variables
+	var self = this;
+		
+	/**
+	 * Checks if the data parameter is empty
+	 */
+	this.empty = function(data) {
+		if (typeof (data) == 'number' || typeof (data) == 'boolean') {
+			return false;
+		}
+		if (typeof (data) == 'undefined' || data === null) {
+			return true;
+		}
+		if (typeof (data.length) != 'undefined') {
+			return data.length == 0;
+		}
+		var count = 0;
+		for (var i in data) {
+			if (data.hasOwnProperty(i)) {
+				count++;
+			}
+		}
+		return count == 0;
+	}
+
+	/**
+	 * Rendering
+	 */		
+	this.render = function() {	
+    	if (typeof self.parentObject.render === 'undefined') {
+    		// Uses the defaut rendering
+    		var xFuzzy = this.fuzzy.fuzzyInputProcessing();
+    		if (this.configuration.options.impreciseInput) {
+    			if (this.configuration.options.displayLowerBoundOnly) {
+    				this.parentObject.draw(xFuzzy[0], this.canvas);	
+    			} else if (this.configuration.options.displayUpperBoundOnly) {
+    				this.parentObject.draw(xFuzzy[1], this.canvas);	
+    			} else {
+    				this.parentObject.draw(xFuzzy[0], this.canvas);
+    				this.parentObject.draw(xFuzzy[1], this.canvasAlt);					
+    			}	
+    		} else {
+    			this.parentObject.draw(xFuzzy, this.canvas);
+    		}
+
+    		if (this.fuzzy.canvasFuzzy !== null) {
+    			this.fuzzy.drawFuzzyPartition();
+    		}   		
+    	} else {
+    		// Uses the parent rendering
+    		self.parentObject.render();
+    	}
+	}
+	
+	
+	/**
+	 * Adds event listeners
+	 */	
+	this.addEventlisteners = function() {
+		// Adds the EventListener "load" to render the parent object when page is loaded
+		window.addEventListener("load", function() {self.render()}, true);
+		
+		// Adds the EventListener "input" and "change" to render the parent object
+		this.element.addEventListener("input", function() {self.render()}, false);
+		this.element.addEventListener("change", function() {self.render()}, true);
+		
+		// Adds the EventListener "doubleclick" to draw the partition
+		this.parentObject.canvas.addEventListener("dblclick", function() {self.doubleClickEventManager()}, false);		
+
+		if (this.configuration.options.impreciseInput || this.parentObject instanceof BiEmoticon) {
+			
+			// Sets the thumb width
+			if (!this.empty(this.configuration.options.sliderThumbWidth)) {
+				this.sliderThumbWidth = this.configuration.options.sliderThumbWidth;
+			}
+			var style = document.createElement("style");
+			style.setAttribute("id", "sliderStyle_" + this.element.id);
+			document.head.append(style);
+			document.getElementById("sliderStyle_" + this.element.id).innerHTML = "." + this.element.id + "::-moz-range-thumb {width: " + this.sliderThumbWidth + "%;}";
+			document.getElementById("sliderStyle_" + this.element.id).innerHTML += "." + this.element.id + "::-webkit-slider-thumb {width: " + this.sliderThumbWidth + "%;}";
+			document.getElementById("sliderStyle_" + this.element.id).innerHTML += "." + this.element.id + "::-ms-thumb {width: " + Math.round(this.sliderThumbWidth*this.element.offsetWidth/100) + "px;}";
+	
+			// Adds the slider id as an additional class to the slider
+			this.element.classList.add(this.element.id);		
+				
+			// Adds the Eventlistener "wheel" to change the size of the cursor
+		    if (this.element.addEventListener) {
+		    	this.element.addEventListener("mousewheel", function(event) {self.wheelEventManager(event)}, false); //IE9, Chrome, Safari, Oper
+		    	this.element.addEventListener("wheel", function(event) {self.wheelEventManager(event)}, false); //Firefox
+		    } else {
+		    	this.element.attachEvent("onmousewheel", function(event) {self.wheelEventManager(event)}); //IE 6/7/8
+		    }
+			
+		    // Adds the EventListeners "mousedown" and "mouseup"
+		    this.element.addEventListener("mousedown", function(event) {self.rightButtonDown = true;});
+		    this.element.addEventListener("mouseup", function(event) {self.rightButtonDown = false;});		    
+
+			// Adds the EventListener "click" 
+		    this.canvas.addEventListener("click", function() {self.clickEventManager(event, self.canvas)}, false);	
+		    
+		    // Adds the EventListener "click" for the second canvas if the option impreciseInput is set
+			if (this.configuration.options.impreciseInput) {
+				// Adds the EventListener "click" 
+				this.canvasAlt.addEventListener("click", function() {self.clickEventManager(event, self.canvasAlt)}, false);	
+
+				// Adds the EventListener "doubleclick" to draw the partition
+				this.canvasAlt.addEventListener("dblclick", function() {self.doubleClickEventManager()}, false);		
+			}		
+		}	
 	}
 	
 	/**
@@ -1024,13 +1261,70 @@ function BiEmoticon(canvas, element, configuration) {
 				}
 			}
 
-		  	style.innerHTML = "." + this.element.id + "::-moz-range-thumb {width: " + self.sliderThumbWidth + "%;}";
-		  	style.innerHTML += "." + this.element.id + "::-webkit-slider-thumb {width: " + self.sliderThumbWidth + "%;}";
+		  	style.innerHTML = "." + this.element.id + "::-moz-range-thumb {width: " + this.sliderThumbWidth + "%;}";
+		  	style.innerHTML += "." + this.element.id + "::-webkit-slider-thumb {width: " + this.sliderThumbWidth + "%;}";
 		  	style.innerHTML += "." + this.element.id + "::-ms-thumb {width: " + this.sliderThumbWidth*this.element.offsetWidth/100 + "px;}\n";	
 	  	
 		}	
-		this.render();
-	}
+		self.render();
+	}	
+	
+	/**
+	 * Manages the click event
+	 */
+	this.clickEventManager = function(event, canvas) {
+		var scrollY = window.scrollY;
+		if (typeof scrollY === 'undefined') {
+			scrollY = document.documentElement.scrollTop;
+		}
+		var x = event.pageX - canvas.getBoundingClientRect().left;
+	    var y = event.pageY - canvas.getBoundingClientRect().top - scrollY;
+	    var size = canvas.width;
+	    var distance = (x - size/2)*(x - size/2) + (-y + size/2)*(-y + size/2);
+
+    	if (event.shiftKey && this.configuration.options.impreciseInput) {
+    		if (canvas == this.canvasAlt) {
+    			if (this.canvasDisplayed) {
+    				this.canvas.style.display = 'none';
+    			} else {
+    				this.canvas.style.display = 'initial';
+    			}
+    			this.canvasDisplayed = !this.canvasDisplayed;
+    		} else {
+    			if (this.canvasAltDisplayed) {
+    				this.canvasAlt.style.display = 'none';
+    			} else {
+    				this.canvasAlt.style.display = 'initial';
+    			}
+    			this.canvasAltDisplayed = !this.canvasAltDisplayed;
+    		}
+    	} else {
+    		if (distance < size*size/4) {
+
+		    	this.parentObject.leftStartAngle = 0;
+		    	this.parentObject.leftEndAngle = 2*Math.PI;
+		        this.parentObject.rightStartAngle = Math.PI/2;
+		    	this.parentObject.rightEndAngle = -Math.PI/2;	    			
+		    	this.parentObject.dashSize = 3;
+    		} else {
+		    	if (x < size/2) {
+		    		this.parentObject.leftStartAngle = 0
+		    		this.parentObject.leftEndAngle = 2*Math.PI;
+			    	this.parentObject.rightStartAngle = 0;
+				    this.parentObject.rightEndAngle = 0;	    			
+		    		this.parentObject.dashSize = 0;
+		    	} else {
+		    		this.parentObject.leftStartAngle = 0
+		    		this.parentObject.leftEndAngle = 0;
+			    	this.parentObject.rightStartAngle = 0;
+				    this.parentObject.rightEndAngle = 2*Math.PI;	    			
+		    		this.parentObject.dashSize = 0;
+		    	}
+    		}
+    	}
+
+    	self.render();
+	} 		
 	
 	/**
 	 * Manages the doubleClick event
@@ -1042,410 +1336,7 @@ function BiEmoticon(canvas, element, configuration) {
 			self.canvas.parentNode.removeChild(self.fuzzy.canvasFuzzy);
 			self.fuzzy.canvasFuzzy = null;
 		}
-	} 
-
-	/**
-	 * Manages the click event
-	 */
-	this.clickEventManager = function(event) {
-		var scrollY = window.scrollY;
-		if (typeof scrollY === 'undefined') {
-			scrollY = document.documentElement.scrollTop;
-		}
-		var x = event.pageX - self.canvas.getBoundingClientRect().left;
-	    var y = event.pageY - self.canvas.getBoundingClientRect().top - scrollY;
-	    var size = this.canvas.width;
-	    var distance = (x - size/2)*(x - size/2) + (-y + size/2)*(-y + size/2);
-
-	    if (distance < size*size/4) {
-	    	this.leftStartAngle = 0;
-	    	this.leftEndAngle = 2*Math.PI;
-	        this.rightStartAngle = Math.PI/2;
-	    	this.rightEndAngle = -Math.PI/2;	    			
-	    	this.dashSize = 3;	    	
-	    } else {
-	    	if (x < size/2) {
-	    		this.leftStartAngle = 0
-	    		this.leftEndAngle = 2*Math.PI;
-		    	this.rightStartAngle = 0;
-			    this.rightEndAngle = 0;	    			
-	    		this.dashSize = 0;
-	    	} else {
-	    		this.leftStartAngle = 0
-	    		this.leftEndAngle = 0;
-		    	this.rightStartAngle = 0;
-			    this.rightEndAngle = 2*Math.PI;	    			
-	    		this.dashSize = 0;
-	    	}
-	    }
-    	self.render();
 	} 	
-	
-	/**
-	 * Draws the bi-emoticon
-	 */
-	this.draw = function(x) {		
-		var colorLower = [];
-		var colorUpper = [];
-		var smileLower;
-		var smileUpper;
-		var secondSmileLower;
-		var secondSmileUpper;		
-		var eyesSizeLower;
-		var eyesSizeUpper;
-		var gradientValueLower;
-		var gradientValueUpper;		
-		var eyebrowsLower;
-		var eyebrowsUpper;
-		var size = this.canvas.width;
-		var context = this.canvas.getContext('2d');
-
-		// Creates the fuzzy object and set the input
-		this.fuzzy = new Fuzzy(this);
-		this.fuzzy.fuzzyInput = x;
-
-		// Fuzzifies the value
-		var xFuzzy = this.fuzzy.fuzzyLowerDescription(x, this.configuration.fuzzyPartition);	
-
-		// Gets the maximimum grade of membership in the lower description
-		var LowerDescriptionMax = 0;
-		for (var i =0; i < xFuzzy.length; i++) {
-			LowerDescriptionMax = Math.max(LowerDescriptionMax, xFuzzy[i].value);
-		}
-
-		// Cuts the fuzzy input at the level 1 - LowerDescriptionMax
-		var cut = [x[1] - this.sliderThumbWidth * (1 - LowerDescriptionMax) / 2, x[1] + this.sliderThumbWidth * (1 - LowerDescriptionMax) / 2];
-		this.fuzzy.coverageInterval = cut;
-		this.fuzzy.levelOfConfidence = LowerDescriptionMax;
-		
-		// Gets the color and the smile for the lower bound
-		xFuzzy = this.fuzzy.fuzzyDescription(cut[0], this.configuration.fuzzyPartition);
-		colorLower = this.fuzzy.defuzzify(xFuzzy, this.configuration.colorPrototypes);
-		smileLower = this.fuzzy.defuzzify(xFuzzy, this.configuration.smilePrototypes);
-		secondSmileLower = this.fuzzy.defuzzify(xFuzzy, this.configuration.secondSmilePrototypes);
-		eyesSizeLower = this.fuzzy.defuzzify(xFuzzy, this.configuration.eyesSizePrototypes);
-		gradientValueLower = this.fuzzy.defuzzify(xFuzzy, this.configuration.gradientPrototypes); 
-		eyebrowsLower =  this.fuzzy.defuzzify(xFuzzy, this.configuration.eyebrowsPrototypes); 
-
-		// Gets the color and the smile for the upper bound
-		xFuzzy = this.fuzzy.fuzzyDescription(cut[1], this.configuration.fuzzyPartition);
-		colorUpper = this.fuzzy.defuzzify(xFuzzy, this.configuration.colorPrototypes);
-		smileUpper = this.fuzzy.defuzzify(xFuzzy, this.configuration.smilePrototypes);
-		secondSmileUpper = this.fuzzy.defuzzify(xFuzzy, this.configuration.secondSmilePrototypes);
-		eyesSizeUpper = this.fuzzy.defuzzify(xFuzzy, this.configuration.eyesSizePrototypes);
-		gradientValueUpper = this.fuzzy.defuzzify(xFuzzy, this.configuration.gradientPrototypes); 
-		eyebrowsUpper =  this.fuzzy.defuzzify(xFuzzy, this.configuration.eyebrowsPrototypes); 		
-		
-		// Sets the gradient
-		var gradientLower = context.createLinearGradient(0, 0, 0, gradientValueLower);
-		gradientLower.addColorStop(0, this.configuration.options.gradientColorBegin);	
-		gradientLower.addColorStop(1, this.configuration.options.gradientColorEnd);
-		var gradientUpper = context.createLinearGradient(0, 0, 0, gradientValueUpper);
-		gradientUpper.addColorStop(0, this.configuration.options.gradientColorBegin);	
-		gradientUpper.addColorStop(1, this.configuration.options.gradientColorEnd);		
-		
-		// Left part of the Head
-		context.beginPath();	
-		context.fillStyle = "rgb(" + Math.round(colorLower[0]) + "," + Math.round(colorLower[1]) + "," + Math.round(colorLower[2]) + ")";
-		if (this.configuration.options.gradient && gradientValueLower > 0) {
-			context.fillStyle = gradientLower;
-		}
-		context.arc(size/2, size/2, size/2, this.leftStartAngle, this.leftEndAngle, false);
-		context.fill();	
-		context.closePath();
-
-		// Right part of the Head
-		context.beginPath();		
-		context.fillStyle = "rgb(" + Math.round(colorUpper[0]) + "," + Math.round(colorUpper[1]) + "," + Math.round(colorUpper[2])	+ ")";
-		if (this.configuration.options.gradient && gradientValueUpper> 0) {
-			context.fillStyle = gradientUpper;
-		}
-		context.arc(size/2, size/2, size/2, this.rightStartAngle, this.rightEndAngle, true);
-		context.fill();	
-		context.closePath();			
-
-		// Mouth	
-		// Left part lower Mouth
-		if (this.leftEndAngle != 0) {		
-			context.beginPath();
-			context.moveTo(
-					size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
-			);
-			context.closePath();
-			context.quadraticCurveTo(
-					size*(1.2 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileLower), 
-					size/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileLower)
-			);
-			context.stroke();
-			// Right part lower Mouth
-			context.beginPath();
-			context.moveTo(
-					size/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileLower)
-			);	
-			context.closePath();
-			context.save();
-			context.setLineDash([this.dashSize, this.dashSize]);	
-			context.quadraticCurveTo(
-					size*(0.8 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileLower),
-					size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
-			);		
-			context.stroke();
-			
-			// Second smile
-			if (this.configuration.options.secondSmile) {
-				context.beginPath();
-				context.moveTo(
-						size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
-				);
-				context.closePath();
-				context.quadraticCurveTo(
-						size*(1.2 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileLower), 
-						size/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileLower)
-				);
-				context.stroke();
-				// Right part lower Mouth
-				context.beginPath();
-				context.moveTo(
-						size/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileLower)
-				);	
-				context.closePath();
-				context.save();
-				context.setLineDash([this.dashSize, this.dashSize]);	
-				context.quadraticCurveTo(
-						size*(0.8 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileLower),
-						size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
-				);		
-				context.stroke();	
-				context.restore();
-			}			
-		}
-		
-		// Left part upper Mouth
-		if (this.rightEndAngle != 0) {		
-			context.beginPath();
-			context.moveTo(
-					size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
-			);
-			context.closePath();
-			context.quadraticCurveTo(
-					size*(1.2 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileUpper), 
-					size/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileUpper)
-			);
-			context.stroke();
-			// Right part upper Mouth
-			context.restore();
-			context.beginPath();
-			context.moveTo(
-					size/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileUpper)
-			);	
-			context.closePath();
-			context.quadraticCurveTo(
-					size*(0.8 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * smileUpper),
-					size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-					size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
-			);		
-			context.stroke();
-			
-			// Second smile
-			if (this.configuration.options.secondSmile) {
-				context.beginPath();
-				context.moveTo(
-						size*(1 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
-				);
-				context.closePath();
-				context.quadraticCurveTo(
-						size*(1.2 - this.configuration.options.mouthLengthToSizeRatio)/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileUpper), 
-						size/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileUpper)
-				);
-				context.stroke();
-				// Right part upper Mouth
-				context.restore();
-				context.beginPath();
-				context.moveTo(
-						size/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileUpper)
-				);	
-				context.closePath();
-				context.quadraticCurveTo(
-						size*(0.8 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio + this.configuration.options.smileToSizeRatio * secondSmileUpper),
-						size*(1 + this.configuration.options.mouthLengthToSizeRatio)/2, 
-						size*(1/2 + this.configuration.options.mouthYPositionToSizeRatio)
-				);		
-				context.stroke();
-				context.restore();
-			}			
-			
-		}
-		
-		// Eyebrows
-		if (this.leftEndAngle == 0) {	
-			eyebrowsLower = eyebrowsUpper;
-		}
-		if (this.rightEndAngle == 0) {	
-			eyebrowsUpper = eyebrowsLower;
-		}
-		if (this.configuration.options.eyebrows) {		
-			// Left eyebrow
-			context.save();
-			context.beginPath();
-			context.lineWidth = 2;
-			context.moveTo(
-					size/2 - (this.configuration.options.eyeXPositionToSizeRatio + this.configuration.options.eyeWidthToSizeRatio)*size, 
-					size/2 - this.configuration.options.leftEyeBrowLeftYPositionToSizeRatio*size
-			);
-
-			context.quadraticCurveTo(
-					size/2 - this.configuration.options.eyeXPositionToSizeRatio*size, 
-					size/2 - eyebrowsLower*size, 
-					size/2 - (this.configuration.options.eyeXPositionToSizeRatio - this.configuration.options.eyeWidthToSizeRatio)*size, 
-					size/2 - this.configuration.options.leftEyeBrowRightYPositionToSizeRatio*size
-			);	
-			context.stroke();
-			context.closePath();	
-			
-			// Right eyebrow
-			context.beginPath();
-			context.moveTo(
-					size/2 + (this.configuration.options.eyeXPositionToSizeRatio + this.configuration.options.eyeWidthToSizeRatio)*size, 
-					size/2 - this.configuration.options.leftEyeBrowLeftYPositionToSizeRatio*size
-			);
-			context.quadraticCurveTo(
-					size/2 + this.configuration.options.eyeXPositionToSizeRatio*size, 
-					size/2 - eyebrowsUpper*size, 
-					size/2 + (this.configuration.options.eyeXPositionToSizeRatio - this.configuration.options.eyeWidthToSizeRatio)*size, 
-					size/2 - this.configuration.options.leftEyeBrowRightYPositionToSizeRatio*size
-			);	
-			context.stroke();
-			context.closePath();
-			context.restore();
-		}
-		
-		// Eyes
-		if (this.leftEndAngle == 0) {	
-			eyesSizeLower = eyesSizeUpper;
-		}
-		if (this.rightEndAngle == 0) {	
-			eyesSizeUpper = eyesSizeLower;
-		}
-		// Left eye
-		context.beginPath();
-		context.moveTo(
-				size/2 - this.configuration.options.eyeXPositionToSizeRatio*size, 
-				size/2 - this.configuration.options.eyeYPositionToSizeRatio*size
-		);
-		context.closePath();
-		context.save();
-		context.fillStyle = this.configuration.options.eyesFillColor;		
-		scaleWidth = 1.0;
-		scaleHeight = eyesSizeLower*this.configuration.options.eyeHeightToWidthRatio;
-		if (this.configuration.options.eyesSizeScaled) {
-			scaleWidth = eyesSizeLower;
-		}
-		context.scale(scaleWidth, scaleHeight);
-		context.arc(
-				(size/2 - this.configuration.options.eyeXPositionToSizeRatio*size)/scaleWidth, 
-				(size/2  - this.configuration.options.eyeYPositionToSizeRatio*size)/scaleHeight, 
-				this.configuration.options.eyeWidthToSizeRatio*size, 
-				0, Math.PI * 2, true
-		);
-		context.fill();		
-		context.restore();
-		
-		// Right eye
-		context.beginPath();
-		context.moveTo(
-				size/2 + this.configuration.options.eyeXPositionToSizeRatio*size, 
-				size/2 - this.configuration.options.eyeYPositionToSizeRatio*size
-		);
-		context.closePath();
-		context.save();
-		context.fillStyle = this.configuration.options.eyesFillColor;
-		scaleWidth = 1.0;
-		scaleHeight = eyesSizeUpper*this.configuration.options.eyeHeightToWidthRatio;
-		if (this.configuration.options.eyesSizeScaled) {
-			scaleWidth = eyesSizeUpper;
-		}
-		context.scale(scaleWidth, scaleHeight);
-		context.arc(
-				(size/2 + this.configuration.options.eyeXPositionToSizeRatio*size)/scaleWidth, 
-				(size/2  - this.configuration.options.eyeYPositionToSizeRatio*size)/scaleHeight, 
-				this.configuration.options.eyeWidthToSizeRatio*size, 
-				0, Math.PI * 2, true
-		);		
-		context.fill();
-		context.restore();
-	}
-}
-
-/**
- * Configuration
- * 
- * @returns void
- */
-function Configuration(parentObject, userConfiguration) {	
-	// Properties
-	this.parentObject = parentObject;
-	this.configuration = {};
-	
-	var self = this;
-	
-	/**
-	 * Checks if data is empty
-	 */
-	this.empty = function(data) {
-		if (typeof (data) == 'number' || typeof (data) == 'boolean') {
-			return false;
-		}
-		if (typeof (data) == 'undefined' || data === null) {
-			return true;
-		}
-		if (typeof (data.length) != 'undefined') {
-			return data.length == 0;
-		}
-		var count = 0;
-		for ( var i in data) {
-			if (data.hasOwnProperty(i)) {
-				count++;
-			}
-		}
-		return count == 0;
-	}
-	
-	/**
-	 * Adds event listeners
-	 */	
-	this.addEventlisteners = function() {
-		// Adds the EventListener "load" to render the parent object when page is loaded
-		window.addEventListener("load", function() {self.parentObject.render()}, true);
-		
-		// Adds the EventListener "input" and "change" to render the parent object
-		this.parentObject.element.addEventListener("input", function() {self.parentObject.render()}, false);
-		this.parentObject.element.addEventListener("change", function() {self.parentObject.render()}, true);
-		
-		// Adds the EventListener "doubleclick" to draw the partition
-		this.parentObject.canvas.addEventListener("dblclick", function() {self.parentObject.doubleClickEventManager()}, false);		
-	}
 	
 	/**
 	 * Updates the configuration
@@ -1459,7 +1350,7 @@ function Configuration(parentObject, userConfiguration) {
 			this.configuration.options =  Object.assign({}, this.parentObject.defaultConfiguration.options, userConfiguration.options);
 		}
 	}	
-	
+			
 	/**
 	 * Defines the polyfills
 	 */	
@@ -1545,17 +1436,27 @@ function Configuration(parentObject, userConfiguration) {
 		}
 	}
 	
-	// Initializes the configuration
-	this.initialize = function(userConfiguration) {
-		// Adds the event listeners
-		this.addEventlisteners();
-		// Updates the configuration
-		this.update(userConfiguration);
-		// Adds polyfills
-		this.polyfills();
-	}
+	// Updates the configuration
+	this.update(userConfiguration);
 	
-	this.initialize(userConfiguration);	
+	// Creates the fuzzy object
+	this.fuzzy = new Fuzzy(this);
+	
+	// Adds a canvas in case of imprecise input
+	if (this.configuration.options.impreciseInput) {
+		this.canvasAlt = document.createElement("canvas");	
+		this.canvasAlt.id = this.canvas.id + "Alt";	
+		this.canvasAlt.width = this.canvas.width;
+		this.canvasAlt.height = this.canvas.height;		
+		this.canvasAlt.classList.add("alt");
+		this.canvas.parentNode.insertBefore(this.canvasAlt, this.canvas.nextSibling);	
+	}	
+	
+	// Adds the event listeners
+	this.addEventlisteners();	
+	
+	// Adds polyfills
+	this.polyfills();
 }
 
 /**
@@ -1575,7 +1476,7 @@ function Fuzzy(parentObject) {
 	 */
 	this.drawFuzzyPartition = function() {
 		var fuzzyPartition = this.parentObject.configuration.fuzzyPartition; 
-		
+	
 		// Creates the canvas if it does not exist
 		if (this.canvasFuzzy === null) {
 			this.canvasFuzzy = document.createElement("canvas");
@@ -1587,7 +1488,11 @@ function Fuzzy(parentObject) {
 			}
 			this.canvasFuzzy.height = this.parentObject.configuration.options.canvasFuzzyHeight;			
 			this.canvasFuzzy.classList.add("fuzzy");
-			this.parentObject.canvas.parentNode.insertBefore(this.canvasFuzzy, this.parentObject.canvas.nextSibling);	
+			if (this.parentObject.configuration.options.impreciseInput) {
+				this.parentObject.canvas.parentNode.insertBefore(this.canvasFuzzy, this.parentObject.canvasAlt.nextSibling);									
+			} else {
+				this.parentObject.canvas.parentNode.insertBefore(this.canvasFuzzy, this.parentObject.canvas.nextSibling);					
+			}
 		}
 		
 		// Finds the lower and upper bounds
@@ -1606,12 +1511,12 @@ function Fuzzy(parentObject) {
 		var context = this.canvasFuzzy.getContext("2d");
 		var coeff = this.canvasFuzzy.width/(upperBound - lowerBound);
 		var heightOffset = 10;
-		
-		if (this.canvasFuzzy.getContext) {
+	
+		if (context !== null) {
 			context.clearRect(0, 0, this.canvasFuzzy.width, this.canvasFuzzy.height);
 			if (Array.isArray(this.fuzzyInput)) {
 				heightOffset = 20;
-			}
+			}		
 			for (var i=0; i < fuzzyPartition.length; i++) {			
 				context.save();
 				context.beginPath();
@@ -1662,7 +1567,43 @@ function Fuzzy(parentObject) {
 				context.restore();
 			}
 		}
+	}
+	
+	/**
+	 * Processes the input according to its type
+	 * 
+	 */
+	this.fuzzyInputProcessing = function() {	
+		if (this.parentObject.configuration.options.impreciseInput || this.parentObject.parentObject instanceof BiEmoticon) {
+			// Processing for an imprecise input
+			var sliderThumbWidth = this.parentObject.sliderThumbWidth;
+			var x = (100 - sliderThumbWidth) * this.parentObject.element.value/100 + sliderThumbWidth/2;
+			var xFuzzy = [];
+			this.fuzzyInput = [x - sliderThumbWidth/2, x, x, x + sliderThumbWidth/2];
 
+			// Fuzzifies the value
+			var xFuzzy = this.fuzzyLowerDescription(this.fuzzyInput, this.parentObject.configuration.fuzzyPartition);	
+
+			// Gets the maximimum grade of membership in the lower description
+			var LowerDescriptionMax = 0;
+			for (var i =0; i < xFuzzy.length; i++) {
+				LowerDescriptionMax = Math.max(LowerDescriptionMax, xFuzzy[i].value);
+			}
+
+			// Cuts the fuzzy input at the level 1 - LowerDescriptionMax
+			var cut = [this.fuzzyInput[1] - sliderThumbWidth * (1 - LowerDescriptionMax) / 2, this.fuzzyInput[1] + sliderThumbWidth * (1 - LowerDescriptionMax) / 2];
+			this.coverageInterval = cut;
+			this.levelOfConfidence = LowerDescriptionMax;		
+			
+			return [
+				this.fuzzyDescription(cut[0], this.parentObject.configuration.fuzzyPartition),
+				this.fuzzyDescription(cut[1], this.parentObject.configuration.fuzzyPartition)
+				];			
+		} else {
+			// Processing for a crisp input
+			this.fuzzyInput = this.parentObject.element.value;
+			return this.fuzzyDescription(this.fuzzyInput, this.parentObject.configuration.fuzzyPartition);
+		}	
 	}
 
 	/**
@@ -1673,8 +1614,8 @@ function Fuzzy(parentObject) {
 		var result = [];
 		for (i = 0; i < membershipFunctions.length; i++) {
 			result[i] = {
-				"value" : this.gradeOfMembership(membershipFunctions[i], x),
-				"label" : membershipFunctions[i].label
+				"value": this.gradeOfMembership(membershipFunctions[i], x),
+				"label": membershipFunctions[i].label
 			};
 		}
 		return result;
@@ -1687,8 +1628,8 @@ function Fuzzy(parentObject) {
 		var result = [];
 		for (i = 0; i < membershipFunctions.length; i++) {
 			result[i] = {
-				"value" : this.gradeOfMembershipTrapezoidalInput(membershipFunctions[i], x),
-				"label" : membershipFunctions[i].label
+				"value": this.gradeOfMembershipTrapezoidalInput(membershipFunctions[i], x),
+				"label": membershipFunctions[i].label
 			};
 		}
 		return result;

@@ -1,0 +1,20 @@
+{
+  "name": "PictorialScales",
+  "version": "2.0.0",
+  "description": "JavaScript to build pictorial scales associated with HTML elements.",
+  "main": "PictorialScales.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YolfTypo3/PictorialScales.git"
+  },
+  "keywords": [],
+  "author": "Laurent Foulloy",
+  "license": "GNU",
+  "bugs": {
+    "url": "https://github.com/YolfTypo3/PictorialScales/issues"
+  },
+  "homepage": "https://github.com/YolfTypo3/PictorialScales#readme"
+}
