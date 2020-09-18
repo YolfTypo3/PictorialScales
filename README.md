@@ -38,7 +38,7 @@ var x = new Emoticon("canvas4", "slider4", {
 						"color" : [ 255, 255, 0 ],
 						"label" : "N"
 					}, {
-						"bounds" : [ 55, 90, 100, 100; null ],
+						"bounds" : [ 55, 90, 100, 100, null ],
 						"color" : [ 255, 0, 0 ],
 						"label" : "U"
 					} ]
@@ -134,9 +134,9 @@ var x = new Emoticon("canvas1", "slider1", {
 - canvasFuzzyHeight (default 150): height of the canvas used to display the fuzzy partition.
 - canvasFuzzyWidth (default 400): width of the canvas used to display the fuzzy partition.	
 - impreciseInput (default false): if true, a triangular fuzzy input is set (use the mouse right button + wheel to modify it).
-- linguisticInput (default false): if true, a linguistic fuzzy input is considered. The expression of a fuzzy input must be grade1/label1 + grade2/label2 + .... See the last emoticon example in which the default linguistic fuzzy input is 0/U + 0.3/N + 0.7/S. In such a case, only prototypes must be defined. Indeed, the fuzzy partition does not make sense since grades of membership are provided for each label.
+- linguisticInput (default false): if true, a linguistic fuzzy input is considered. The expression of a fuzzy input must be grade1/label1 + grade2/label2 + .... See the last emoticon example in which the default linguistic fuzzy input is 0/U + 0.3/N + 0.7/S. In such a case, only prototypes must be defined. Indeed, the fuzzy partition is not required since grades of membership are provided for each label.
 Note : since labels may contain + or - signs, each part of the fuzzy input must be separated by a space.
-- nanColor (default [116, 208, 241]): it may occur that emoticon should be displayed event when the linguitic fuzzy input is not known. In that case, use "nan" should be used for the input. The option is the color when "nan" is used.
+- nanColor (default [116, 208, 241]): it may occur that an emoticon should be displayed even if the linguitic fuzzy input is not known. In that case, "nan" should be used for the input. This option defines the color when "nan" is used.
 - nanSmile (default 0): smile value when "nan" is used. 
 - nanEyesSize (default 1: eye size value when "nan" is used.  
 
