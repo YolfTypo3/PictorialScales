@@ -17,10 +17,16 @@
 function Arrow(canvas, element, configuration) {
 	// Attributes
 	this.canvas = document.getElementById(canvas);
-	this.element = document.getElementById(element);
+	if (Array.isArray(element)) {
+		this.element = document.getElementById(element[0]);
+		this.support = document.getElementById(element[1]);
+	} else {
+		this.element = document.getElementById(element);
+		this.support = false;
+	}
 	this.defaultConfiguration = {
 			"fuzzyPartition": [ {
-				"bounds": [ 0, 0, 15, 50 ],
+				"bounds": [ null, 0, 0, 15, 50 ],
 				"color": [ 255, 0, 0 ],
 				"label": "U"
 			}, {
@@ -28,7 +34,7 @@ function Arrow(canvas, element, configuration) {
 				"color": [ 255, 255, 0 ],
 				"label": "N"
 			}, {
-				"bounds": [ 55, 90, 100, 100 ],
+				"bounds": [ 55, 90, 100, 100, null],
 				"color": [ 0, 255, 0 ],
 				"label": "S"
 			} ],
@@ -117,10 +123,16 @@ function Arrow(canvas, element, configuration) {
 function SunCloud(canvas, element, configuration) {
 	// Attributes
 	this.canvas = document.getElementById(canvas);
-	this.element = document.getElementById(element);
+	if (Array.isArray(element)) {
+		this.element = document.getElementById(element[0]);
+		this.support = document.getElementById(element[1]);
+	} else {
+		this.element = document.getElementById(element);
+		this.support = false;
+	}
 	this.defaultConfiguration = {		
 			"fuzzyPartition": [ {
-				"bounds": [ 0, 0, 0, 25 ],
+				"bounds": [null, 0, 0, 0, 25 ],
 				"color": [ 255, 0, 0 ],
 				"label": "VL"
 			}, {
@@ -136,7 +148,7 @@ function SunCloud(canvas, element, configuration) {
 				"color": [ 128, 255, 0 ],
 				"label": "R"		
 			}, {
-				"bounds": [ 75, 100, 100, 100 ],
+				"bounds": [ 75, 100, 100, 100, null],
 				"color": [ 0, 255, 0 ],
 				"label": "VR"					
 			} ],
@@ -406,10 +418,16 @@ function SunCloud(canvas, element, configuration) {
 function Emoticon(canvas, element, configuration) {
 	// Attributes
 	this.canvas = document.getElementById(canvas);
-	this.element = document.getElementById(element);
+	if (Array.isArray(element)) {
+		this.element = document.getElementById(element[0]);
+		this.support = document.getElementById(element[1]);
+	} else {
+		this.element = document.getElementById(element);
+		this.support = false;
+	}
 	this.defaultConfiguration = {
 			"fuzzyPartition": [ {
-				"bounds": [ 0, 0, 15, 50 ],
+				"bounds": [ null, 0, 0, 15, 50 ],
 				"color": [ 255, 0, 0 ],
 				"label": "U"
 			}, {
@@ -417,7 +435,7 @@ function Emoticon(canvas, element, configuration) {
 				"color": [ 255, 255, 0 ],
 				"label": "N"
 			}, {
-				"bounds": [ 55, 90, 100, 100 ],
+				"bounds": [ 55, 90, 100, 100, null ],
 				"color": [ 0, 255, 0 ],
 				"label": "S"
 			} ],
@@ -504,7 +522,10 @@ function Emoticon(canvas, element, configuration) {
 				"gradientColorBegin": "#0752DE",
 				"gradientColorEnd": "yellow",
 				"canvasFuzzyHeight": 150,
-				"canvasFuzzyWidth": 400				
+				"canvasFuzzyWidth": 400,
+				"nanColor": [116, 208, 241],
+				"nanSmile": 0,
+				"nanEyesSize": 1
 			}
 	};
 
@@ -520,18 +541,37 @@ function Emoticon(canvas, element, configuration) {
 		var configuration = this.configurationManager.configuration;
 
 		// Gets the color and the smile
-		var color = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.colorPrototypes);
-		var smile = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.smilePrototypes);
-		var secondSmile = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.secondSmilePrototypes);
-		var eyesSize = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.eyesSizePrototypes);
-		var gradientValue = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.gradientPrototypes); 
-		var eyebrows =  this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.eyebrowsPrototypes); 
+		if (this.element.value == 'nan') {
+			var color = configuration.options.nanColor;
+			var smile = configuration.options.nanSmile;
+			var eyesSize = configuration.options.nanEyesSize;
 			
-		// Sets the gradient
-		var gradient = context.createLinearGradient(0, 0, 0, gradientValue);
-		gradient.addColorStop(0, configuration.options.gradientColorBegin);	
-		gradient.addColorStop(1, configuration.options.gradientColorEnd);
+		} else {
+			var color = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.colorPrototypes);
+			var smile = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.smilePrototypes);
+			if (configuration.eyesSizePrototypes.length == 0) {
+				var eyesSize = 1;
+			} else {
+				var eyesSize = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.eyesSizePrototypes);
+			}
 
+		}
+		
+		// Other configurations
+		if (configuration.options.secondSmile) {
+			var secondSmile = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.secondSmilePrototypes);
+		}
+		if (configuration.options.gradient) {
+			var gradientValue = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.gradientPrototypes); 
+			// Sets the gradient
+			var gradient = context.createLinearGradient(0, 0, 0, gradientValue);
+			gradient.addColorStop(0, configuration.options.gradientColorBegin);	
+			gradient.addColorStop(1, configuration.options.gradientColorEnd);		
+		}		
+		if (configuration.options.eyebrows) {
+			var eyebrows =  this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.eyebrowsPrototypes); 
+		}
+		
 		// Head
 		context.beginPath();		
 		context.fillStyle = "rgb(" + Math.round(color[0]) + "," + Math.round(color[1]) + "," + Math.round(color[2]) + ")";
@@ -705,10 +745,16 @@ function Emoticon(canvas, element, configuration) {
 function BiEmoticon(canvas, element, configuration) {
 	// Attributes
 	this.canvas = document.getElementById(canvas);
-	this.element = document.getElementById(element);
+	if (Array.isArray(element)) {
+		this.element = document.getElementById(element[0]);
+		this.support = document.getElementById(element[1]);
+	} else {
+		this.element = document.getElementById(element);
+		this.support = false;
+	}
 	this.defaultConfiguration = {
 			"fuzzyPartition": [ {
-				"bounds": [ 0, 0, 15, 50 ],
+				"bounds": [ null, 0, 0, 15, 50 ],
 				"color": [ 255, 0, 0 ],
 				"label": "U"
 			}, {
@@ -716,7 +762,7 @@ function BiEmoticon(canvas, element, configuration) {
 				"color": [ 255, 255, 0 ],
 				"label": "N"
 			}, {
-				"bounds": [ 55, 90, 100, 100 ],
+				"bounds": [ 55, 90, 100, 100, null ],
 				"color": [ 0, 255, 0 ],
 				"label": "S"
 			} ],
@@ -837,26 +883,34 @@ function BiEmoticon(canvas, element, configuration) {
 		// Gets the color and the smile for the lower bound
 		var colorLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.colorPrototypes);
 		var smileLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.smilePrototypes);
-		var secondSmileLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.secondSmilePrototypes);
 		var eyesSizeLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.eyesSizePrototypes);
-		var gradientValueLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.gradientPrototypes); 
-		var eyebrowsLower =  this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.eyebrowsPrototypes); 
 
 		// Gets the color and the smile for the upper bound
 		var colorUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.colorPrototypes);
 		var smileUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.smilePrototypes);
-		var secondSmileUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.secondSmilePrototypes);
 		var eyesSizeUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.eyesSizePrototypes);
-		var gradientValueUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.gradientPrototypes); 
-		var eyebrowsUpper =  this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.eyebrowsPrototypes); 		
-		
-		// Sets the gradient
-		var gradientLower = context.createLinearGradient(0, 0, 0, gradientValueLower);
-		gradientLower.addColorStop(0, configuration.options.gradientColorBegin);	
-		gradientLower.addColorStop(1, configuration.options.gradientColorEnd);
-		var gradientUpper = context.createLinearGradient(0, 0, 0, gradientValueUpper);
-		gradientUpper.addColorStop(0, configuration.options.gradientColorBegin);	
-		gradientUpper.addColorStop(1, configuration.options.gradientColorEnd);		
+
+		// Other configurations
+		if (configuration.options.secondSmile) {
+			var secondSmileLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.secondSmilePrototypes);
+			var secondSmileUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.secondSmilePrototypes);
+		}
+		if (configuration.options.gradient) {
+			var gradientValueLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.gradientPrototypes); 
+			var gradientValueUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.gradientPrototypes); 
+
+			// Sets the gradient
+			var gradientLower = context.createLinearGradient(0, 0, 0, gradientValueLower);
+			gradientLower.addColorStop(0, configuration.options.gradientColorBegin);	
+			gradientLower.addColorStop(1, configuration.options.gradientColorEnd);
+			var gradientUpper = context.createLinearGradient(0, 0, 0, gradientValueUpper);
+			gradientUpper.addColorStop(0, configuration.options.gradientColorBegin);	
+			gradientUpper.addColorStop(1, configuration.options.gradientColorEnd);			
+		}		
+		if (configuration.options.eyebrows) {
+			var eyebrowsLower =  this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.eyebrowsPrototypes); 
+			var eyebrowsUpper =  this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.eyebrowsPrototypes); 		
+		}
 		
 		// Left part of the Head
 		context.beginPath();	
@@ -1121,6 +1175,7 @@ function ConfigurationManager(parentObject, userConfiguration) {
 	this.parentObject = parentObject;
 	this.canvas = parentObject.canvas;
 	this.element = parentObject.element;
+	this.support = parentObject.support;
 	this.canvasAlt = {};
 	this.configuration = {};
 	this.fuzzy = {};
@@ -1196,8 +1251,10 @@ function ConfigurationManager(parentObject, userConfiguration) {
 		this.element.addEventListener("change", function() {self.render()}, true);
 		
 		// Adds the EventListener "doubleclick" to draw the partition
-		this.parentObject.canvas.addEventListener("dblclick", function() {self.doubleClickEventManager()}, false);		
-
+		if (!this.configuration.options.linguisticInput) {
+			this.parentObject.canvas.addEventListener("dblclick", function() {self.doubleClickEventManager()}, false);		
+		}
+		
 		if (this.configuration.options.impreciseInput || this.parentObject instanceof BiEmoticon) {
 			
 			// Sets the thumb width
@@ -1470,13 +1527,45 @@ function Fuzzy(parentObject) {
 	this.canvasFuzzy = document.getElementById(parentObject.canvas.id + "Fuzzy");
 	this.fuzzyInput = null;
 	this.coverageInterval = null;
+	this.fuzzyPartition = this.parentObject.configuration.fuzzyPartition;
+	// Finds the lower and upper bounds
+	var definedBounds = this.fuzzyPartition[0].bounds
+	if (definedBounds.length == 5) {
+		if (definedBounds[0] == null) {
+			var bounds = definedBounds.slice(1,5);
+		} else {
+			var bounds = definedBounds.slice(0,4);
+		}
+	} else {
+		var bounds = definedBounds;
+	}
+
+	this.lowerBound = bounds[0];
+	this.upperBound = bounds[3];
+	for (var i=1; i < this.fuzzyPartition.length; i++) {
+		var definedBounds = this.fuzzyPartition[i].bounds
+		if (definedBounds.length == 5) {
+			if (definedBounds[0] == null) {
+				var bounds = definedBounds.slice(1,5);
+			} else {
+				var bounds = definedBounds.slice(0,4);
+			}
+		} else {
+			var bounds = definedBounds;
+		}		
+		
+		if (bounds[0] < this.lowerBound) {
+			this.lowerBound = bounds[0];
+		}
+		if (bounds[3] > this.upperBound) {
+			this.upperBound = bounds[3];
+		}			
+	}	
 
 	/**
 	 * Draws the fuzzy partition
 	 */
-	this.drawFuzzyPartition = function() {
-		var fuzzyPartition = this.parentObject.configuration.fuzzyPartition; 
-	
+	this.drawFuzzyPartition = function() {	
 		// Creates the canvas if it does not exist
 		if (this.canvasFuzzy === null) {
 			this.canvasFuzzy = document.createElement("canvas");
@@ -1494,52 +1583,65 @@ function Fuzzy(parentObject) {
 				this.parentObject.canvas.parentNode.insertBefore(this.canvasFuzzy, this.parentObject.canvas.nextSibling);					
 			}
 		}
-		
-		// Finds the lower and upper bounds
-		var lowerBound = fuzzyPartition[0].bounds[0];
-		var upperBound = fuzzyPartition[0].bounds[3];
-		for (var i=1; i < fuzzyPartition.length; i++) {
-			if (fuzzyPartition[i].bounds[0] < lowerBound) {
-				lowerBound = fuzzyPartition[i].bounds[0];
-			}
-			if (fuzzyPartition[i].bounds[3] > upperBound) {
-				upperBound = fuzzyPartition[i].bounds[3];
-			}			
-		}
-		
+
 		// Draws the the membership functions
 		var context = this.canvasFuzzy.getContext("2d");
-		var coeff = this.canvasFuzzy.width/(upperBound - lowerBound);
+		var coeff = this.canvasFuzzy.width/(this.upperBound - this.lowerBound);
 		var heightOffset = 10;
 	
 		if (context !== null) {
 			context.clearRect(0, 0, this.canvasFuzzy.width, this.canvasFuzzy.height);
 			if (Array.isArray(this.fuzzyInput)) {
 				heightOffset = 20;
-			}		
-			for (var i=0; i < fuzzyPartition.length; i++) {			
-				context.save();
-				context.beginPath();
-				context.strokeStyle = "rgb(" + fuzzyPartition[i].color[0] + "," + fuzzyPartition[i].color[1] + "," + fuzzyPartition[i].color[2]
-				+ ")";
-				context.moveTo(coeff*(fuzzyPartition[i].bounds[0] - lowerBound), this.canvasFuzzy.height-10);
-				context.lineTo(coeff*(fuzzyPartition[i].bounds[1] - lowerBound), heightOffset);
-				context.lineTo(coeff*(fuzzyPartition[i].bounds[2] - lowerBound), heightOffset);
-				context.lineTo(coeff*(fuzzyPartition[i].bounds[3] - lowerBound), this.canvasFuzzy.height-10);
-				context.closePath();
-				context.stroke();
-				context.restore();
 			}	
-
+			context.save();
+			for (var i=0; i < this.fuzzyPartition.length; i++) {			
+				context.beginPath();
+				context.strokeStyle = "rgb(" + this.fuzzyPartition[i].color[0] + "," + this.fuzzyPartition[i].color[1] + "," + this.fuzzyPartition[i].color[2]
+				+ ")";
+				var definedBounds = this.fuzzyPartition[i].bounds
+				if (definedBounds.length == 5) {
+					if (definedBounds[0] == null) {
+						var bounds = definedBounds.slice(1,5);
+					} else {
+						var bounds = definedBounds.slice(0,4);
+					}
+				} else {
+					var bounds = definedBounds;
+				}		
+				console.log(bounds);
+				context.moveTo(coeff*(bounds[0] - this.lowerBound), this.canvasFuzzy.height-20);
+				context.lineTo(coeff*(bounds[1] - this.lowerBound), heightOffset);
+				context.lineTo(coeff*(bounds[2] - this.lowerBound), heightOffset);
+				context.lineTo(coeff*(bounds[3] - this.lowerBound), this.canvasFuzzy.height-20);
+				context.stroke();
+				context.closePath();
+			}	
+			context.beginPath();
+			context.strokeStyle = "rgb(0,0,0)";
+			context.moveTo(1, this.canvasFuzzy.height-20);
+			context.lineTo(this.canvasFuzzy.width, this.canvasFuzzy.height-20);
+			
+			// Draws the bounds values
+			context.font = "bold 14px times";
+			var text = this.lowerBound.toFixed(2)
+			context.fillText(text, 1, this.canvasFuzzy.height);
+			text = this.upperBound.toFixed(2)
+			position = this.canvasFuzzy.width -context.measureText(text).width
+			context.fillText(text, position , this.canvasFuzzy.height)
+			context.stroke();
+			context.closePath();
+			context.restore();
+						
 			// Draws the input
 			if (this.fuzzyInput !== null) {
 				context.save();
 				context.beginPath();
 				context.setLineDash([3, 3]);
 				if (Array.isArray(this.fuzzyInput)) {			
-					context.moveTo(coeff*(this.fuzzyInput[0] - lowerBound), this.canvasFuzzy.height-10);
-					context.lineTo(coeff*(this.fuzzyInput[1] - lowerBound), heightOffset);
-					context.lineTo(coeff*(this.fuzzyInput[3] - lowerBound), this.canvasFuzzy.height-10);
+					context.moveTo(coeff*(this.fuzzyInput[0] - this.lowerBound), this.canvasFuzzy.height-10);
+					context.lineTo(coeff*(this.fuzzyInput[1] - this.lowerBound), heightOffset);
+					context.lineTo(coeff*(this.fuzzyInput[3] - this.lowerBound), this.canvasFuzzy.height-10);
 					context.stroke();
 					// Draws the coverage interval
 					if (this.coverageInterval !== null) {
@@ -1547,10 +1649,10 @@ function Fuzzy(parentObject) {
 						context.beginPath();
 						context.setLineDash([3, 1]);
 						context.strokeStyle = "rgb(0, 0, 255)";
-						context.moveTo(coeff*(this.coverageInterval[0] - lowerBound), this.canvasFuzzy.height-10);
-						context.lineTo(coeff*(this.coverageInterval[0] - lowerBound), heightOffset);
-						context.lineTo(coeff*(this.coverageInterval[1] - lowerBound), heightOffset);
-						context.lineTo(coeff*(this.coverageInterval[1] - lowerBound), this.canvasFuzzy.height-10);
+						context.moveTo(coeff*(this.coverageInterval[0] - this.lowerBound), this.canvasFuzzy.height-20);
+						context.lineTo(coeff*(this.coverageInterval[0] - this.lowerBound), heightOffset);
+						context.lineTo(coeff*(this.coverageInterval[1] - this.lowerBound), heightOffset);
+						context.lineTo(coeff*(this.coverageInterval[1] - this.lowerBound), this.canvasFuzzy.height-20);
 						context.font = "bold 15px Arial";
 						context.textAlign = "center";
 						context.fillText("Level of confidence = " + this.levelOfConfidence.toFixed(2), this.canvasFuzzy.width/2, 15);
@@ -1559,8 +1661,8 @@ function Fuzzy(parentObject) {
 						context.restore();
 					}
 				} else {
-					context.moveTo(coeff*(this.fuzzyInput - lowerBound), this.canvasFuzzy.height-10);
-					context.lineTo(coeff*(this.fuzzyInput - lowerBound), heightOffset);
+					context.moveTo(coeff*(this.fuzzyInput - this.lowerBound), this.canvasFuzzy.height-20);
+					context.lineTo(coeff*(this.fuzzyInput - this.lowerBound), heightOffset);
 					context.stroke();
 				}
 				context.closePath();
@@ -1576,9 +1678,22 @@ function Fuzzy(parentObject) {
 	this.fuzzyInputProcessing = function() {	
 		if (this.parentObject.configuration.options.impreciseInput || this.parentObject.parentObject instanceof BiEmoticon) {
 			// Processing for an imprecise input
-			var sliderThumbWidth = this.parentObject.sliderThumbWidth;
-			var x = (100 - sliderThumbWidth) * this.parentObject.element.value/100 + sliderThumbWidth/2;
-			var xFuzzy = [];
+			if (this.parentObject.support !== false) {
+				var sliderThumbWidth = this.parentObject.support.value;
+				var x = parseFloat(this.parentObject.element.value);
+				if (sliderThumbWidth == 0) {
+					// Processing for a crisp input
+					this.fuzzyInput = x;
+					return [
+						this.fuzzyDescription(this.fuzzyInput, this.parentObject.configuration.fuzzyPartition),
+						this.fuzzyDescription(this.fuzzyInput, this.parentObject.configuration.fuzzyPartition)
+						];	
+				}	
+			} else {
+				var sliderThumbWidth = this.parentObject.sliderThumbWidth;
+				var x = (100 - sliderThumbWidth) * this.parentObject.element.value/100 + sliderThumbWidth/2;
+			}
+
 			this.fuzzyInput = [x - sliderThumbWidth/2, x, x, x + sliderThumbWidth/2];
 
 			// Fuzzifies the value
@@ -1599,11 +1714,35 @@ function Fuzzy(parentObject) {
 				this.fuzzyDescription(cut[0], this.parentObject.configuration.fuzzyPartition),
 				this.fuzzyDescription(cut[1], this.parentObject.configuration.fuzzyPartition)
 				];			
+		} else if (this.parentObject.configuration.options.linguisticInput) {
+			// The input is a linguistic fuzzy set 
+			// gradeOfMembership1/label1 + ... + gradeOfMembershipn/labeln
+			this.fuzzyInput = this.parentObject.element.value;
+
+			if (this.fuzzyInput == 'nan') {
+				return this.fuzzyInput;
+			}
+			var pattern = /(\d+(\.\d+)?)\s*\/\s*((?:\w|\+|-)+)/g;
+			var result = this.fuzzyInput.match(pattern);
+			var finalResult = [];
+			for (var i =0; i < result.length; i++) {
+				var patternGrade = /(\d+(?:\.\d+)?)/;
+				var gradeOfMembership = result[i].match(patternGrade);
+				var patternLabel = /\/\s*((?:\w|\+|-)+)/
+				var label = result[i].match(patternLabel);
+				finalResult[i] = {
+					"value": parseFloat(gradeOfMembership[1]),
+					"label": label[1]						
+				};
+			}
+
+			return finalResult;
 		} else {
 			// Processing for a crisp input
 			this.fuzzyInput = this.parentObject.element.value;
 			return this.fuzzyDescription(this.fuzzyInput, this.parentObject.configuration.fuzzyPartition);
-		}	
+			
+		}
 	}
 
 	/**
@@ -1618,6 +1757,7 @@ function Fuzzy(parentObject) {
 				"label": membershipFunctions[i].label
 			};
 		}
+		
 		return result;
 	}
 
@@ -1646,11 +1786,22 @@ function Fuzzy(parentObject) {
 		var d1  = x[3];
 		var result = 1;
 		var u;
-
-		g2  = membershipFunction.bounds[0];
-		mg2 = membershipFunction.bounds[1];
-		md2 = membershipFunction.bounds[2];
-		d2  = membershipFunction.bounds[3];
+		
+		var definedBounds = membershipFunction.bounds
+		if (definedBounds.length == 5) {
+			if (definedBounds[0] == null) {
+				var bounds = definedBounds.slice(1,5);
+			} else {
+				var bounds = definedBounds.slice(0,4);
+			}
+		} else {
+			var bounds = definedBounds;
+		}
+		
+		g2  = bounds[0];
+		mg2 = bounds[1];
+		md2 = bounds[2];
+		d2  = bounds[3];
 
 		// The input is crisp
 		if (g1 == mg1 && g1 == md1 && g1 == d1)
@@ -1757,20 +1908,37 @@ function Fuzzy(parentObject) {
 	 * point x
 	 */
 	this.gradeOfMembership = function(membershipFunction, x) {
-		if (x < membershipFunction.bounds[0]) {
-			return 0;
-		} else if (x < membershipFunction.bounds[1]) {
-			return (x - membershipFunction.bounds[0])
-					/ (membershipFunction.bounds[1] - membershipFunction.bounds[0]);
-		} else if (x < membershipFunction.bounds[2]) {
-			return 1.0;
-		} else if (x < membershipFunction.bounds[3]) {
-			return (membershipFunction.bounds[3] - x)
-					/ (membershipFunction.bounds[3] - membershipFunction.bounds[2]);
-		} else if (membershipFunction.bounds[2] == membershipFunction.bounds[3]) {
-			return 1.0;
+		var definedBounds = membershipFunction.bounds
+		if (definedBounds.length == 5) {
+			if (definedBounds[0] == null) {
+				var bounds = definedBounds.slice(1,5);
+			} else {
+				var bounds = definedBounds.slice(0,4);
+			}
 		} else {
-			return 0;
+			var bounds = definedBounds;
+		}
+		
+		if (x < bounds[0]) {
+			if (definedBounds.length == 5 && definedBounds[0]== null) {
+				return 1.0
+			} else{
+				return 0.0
+			}
+		} else if (x < bounds[1]) {
+			return (x - bounds[0])
+					/ (bounds[1] - bounds[0]);
+		} else if (x < bounds[2]) {
+			return 1.0;
+		} else if (x < bounds[3]) {
+			return (bounds[3] - x)
+					/ (bounds[3] - bounds[2]);
+		} else {
+			if (definedBounds.length == 5 && definedBounds[4]== null) {
+				return 1.0
+			} else{
+				return 0.0
+			}			
 		}
 	}
 
