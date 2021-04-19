@@ -1,10 +1,16 @@
 /**
  * PictorialScales.js
  * 
- * Version: 2.0.0
+ * Version: 2.2.0
  *
  * Copyright 2020 Laurent Foulloy
  */
+const OPEN_LEFT_MEMBERSHIP_FUNCTION = 0;
+const OPEN_RIGHT_MEMBERSHIP_FUNCTION = 1;
+const TRAPEZOIDAL_MEMBERSHIP_FUNCTION = 2;
+
+const UNIFORM_DISTRIBUTION = 0;
+const NORMAL_DISTRIBUTION = 1;
 
 /**
  * Arrow
@@ -26,15 +32,18 @@ function Arrow(canvas, element, configuration) {
 	}
 	this.defaultConfiguration = {
 			"fuzzyPartition": [ {
-				"bounds": [ null, 0, 0, 15, 50 ],
+				"type": OPEN_LEFT_MEMBERSHIP_FUNCTION,
+				"bounds": [ 0, 0, 15, 50 ],
 				"color": [ 255, 0, 0 ],
 				"label": "U"
 			}, {
+				"type": TRAPEZOIDAL_MEMBERSHIP_FUNCTION,
 				"bounds": [ 15, 50, 55, 90 ],
 				"color": [ 255, 255, 0 ],
 				"label": "N"
 			}, {
-				"bounds": [ 55, 90, 100, 100, null],
+				"type": OPEN_RIGHT_MEMBERSHIP_FUNCTION,
+				"bounds": [ 55, 90, 100, 100],
 				"color": [ 0, 255, 0 ],
 				"label": "S"
 			} ],
@@ -132,23 +141,28 @@ function SunCloud(canvas, element, configuration) {
 	}
 	this.defaultConfiguration = {		
 			"fuzzyPartition": [ {
-				"bounds": [null, 0, 0, 0, 25 ],
+				"type": OPEN_LEFT_MEMBERSHIP_FUNCTION,
+				"bounds": [0, 0, 0, 25 ],
 				"color": [ 255, 0, 0 ],
 				"label": "VL"
 			}, {
+				"type": TRAPEZOIDAL_MEMBERSHIP_FUNCTION,
 				"bounds": [ 0, 25, 25, 50 ],
 				"color": [ 255, 128, 0 ],
 				"label": "L"
 			}, {
+				"type": TRAPEZOIDAL_MEMBERSHIP_FUNCTION,
 				"bounds": [ 25, 50, 50, 75 ],
 				"color": [ 255, 255, 0 ],
 				"label": "N"
 			}, {
+				"type": TRAPEZOIDAL_MEMBERSHIP_FUNCTION,
 				"bounds": [ 50, 75, 75, 100 ],
 				"color": [ 128, 255, 0 ],
 				"label": "R"		
 			}, {
-				"bounds": [ 75, 100, 100, 100, null],
+				"type": OPEN_RIGHT_MEMBERSHIP_FUNCTION,
+				"bounds": [ 75, 100, 100, 100],
 				"color": [ 0, 255, 0 ],
 				"label": "VR"					
 			} ],
@@ -297,7 +311,7 @@ function SunCloud(canvas, element, configuration) {
 		var size = canvas.width;
 		var context = canvas.getContext("2d");
 		var configuration = this.configurationManager.configuration;
-		
+
 		// Gets the color and the smile
 		var sunSize = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.sunSizePrototypes);
 		var sunPosition = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.sunPositionPrototypes);
@@ -427,15 +441,18 @@ function Emoticon(canvas, element, configuration) {
 	}
 	this.defaultConfiguration = {
 			"fuzzyPartition": [ {
-				"bounds": [ null, 0, 0, 15, 50 ],
+				"type": OPEN_LEFT_MEMBERSHIP_FUNCTION,
+				"bounds": [  0, 0, 15, 50 ],
 				"color": [ 255, 0, 0 ],
 				"label": "U"
 			}, {
+				"type": TRAPEZOIDAL_MEMBERSHIP_FUNCTION,
 				"bounds": [ 15, 50, 55, 90 ],
 				"color": [ 255, 255, 0 ],
 				"label": "N"
 			}, {
-				"bounds": [ 55, 90, 100, 100, null ],
+				"type": OPEN_RIGHT_MEMBERSHIP_FUNCTION,
+				"bounds": [ 55, 90, 100, 100 ],
 				"color": [ 0, 255, 0 ],
 				"label": "S"
 			} ],
@@ -554,7 +571,6 @@ function Emoticon(canvas, element, configuration) {
 			} else {
 				var eyesSize = this.configurationManager.fuzzy.defuzzify(xFuzzy, configuration.eyesSizePrototypes);
 			}
-
 		}
 		
 		// Other configurations
@@ -754,15 +770,18 @@ function BiEmoticon(canvas, element, configuration) {
 	}
 	this.defaultConfiguration = {
 			"fuzzyPartition": [ {
-				"bounds": [ null, 0, 0, 15, 50 ],
+				"type": OPEN_LEFT_MEMBERSHIP_FUNCTION,				
+				"bounds": [ 0, 0, 15, 50 ],
 				"color": [ 255, 0, 0 ],
 				"label": "U"
 			}, {
+				"type": TRAPEZOIDAL_MEMBERSHIP_FUNCTION,
 				"bounds": [ 15, 50, 55, 90 ],
 				"color": [ 255, 255, 0 ],
 				"label": "N"
 			}, {
-				"bounds": [ 55, 90, 100, 100, null ],
+				"type": OPEN_RIGHT_MEMBERSHIP_FUNCTION,
+				"bounds": [ 55, 90, 100, 100 ],
 				"color": [ 0, 255, 0 ],
 				"label": "S"
 			} ],
@@ -828,6 +847,7 @@ function BiEmoticon(canvas, element, configuration) {
 			} ],
 			"options": {
 				"impreciseInput": false,
+				"impreciseInputDistribution": UNIFORM_DISTRIBUTION, 
 				"eyeWidthToSizeRatio": 0.08,
 				"eyeHeightToWidthRatio": 1.5,
 				"eyeXPositionToSizeRatio": 0.2,
@@ -883,12 +903,20 @@ function BiEmoticon(canvas, element, configuration) {
 		// Gets the color and the smile for the lower bound
 		var colorLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.colorPrototypes);
 		var smileLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.smilePrototypes);
-		var eyesSizeLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.eyesSizePrototypes);
-
+		if (configuration.eyesSizePrototypes.length == 0) {
+			var eyesSizeLower = 1;
+		} else {
+			var eyesSizeLower = this.configurationManager.fuzzy.defuzzify(xFuzzy[0], configuration.eyesSizePrototypes);
+		}		
+		
 		// Gets the color and the smile for the upper bound
 		var colorUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.colorPrototypes);
 		var smileUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.smilePrototypes);
-		var eyesSizeUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.eyesSizePrototypes);
+		if (configuration.eyesSizePrototypes.length == 0) {
+			var eyesSizeUpper = 1;
+		} else {
+			var eyesSizeUpper = this.configurationManager.fuzzy.defuzzify(xFuzzy[1], configuration.eyesSizePrototypes);
+		}			
 
 		// Other configurations
 		if (configuration.options.secondSmile) {
@@ -1137,8 +1165,7 @@ function BiEmoticon(canvas, element, configuration) {
 				0, Math.PI * 2, true
 		);
 		context.fill();		
-		context.restore();
-		
+		context.restore();		
 		// Right eye
 		context.beginPath();
 		context.moveTo(
@@ -1238,7 +1265,6 @@ function ConfigurationManager(parentObject, userConfiguration) {
     	}
 	}
 	
-	
 	/**
 	 * Adds event listeners
 	 */	
@@ -1249,7 +1275,11 @@ function ConfigurationManager(parentObject, userConfiguration) {
 		// Adds the EventListener "input" and "change" to render the parent object
 		this.element.addEventListener("input", function() {self.render()}, false);
 		this.element.addEventListener("change", function() {self.render()}, true);
-		
+		// EventListener for the support or standard deviation of the possibility distribution
+		if (typeof this.support != 'undefined' && this.support != false) {
+			this.support.addEventListener("input", function() {self.render()}, false);
+			this.support.addEventListener("change", function() {self.render()}, true);		
+		}
 		// Adds the EventListener "doubleclick" to draw the partition
 		if (!this.configuration.options.linguisticInput) {
 			this.parentObject.canvas.addEventListener("dblclick", function() {self.doubleClickEventManager()}, false);		
@@ -1379,7 +1409,6 @@ function ConfigurationManager(parentObject, userConfiguration) {
 		    	}
     		}
     	}
-
     	self.render();
 	} 		
 	
@@ -1399,11 +1428,12 @@ function ConfigurationManager(parentObject, userConfiguration) {
 	 * Updates the configuration
 	 */
 	this.update = function(userConfiguration) {
+
 		// Updates the default configuration
 		if (this.empty(userConfiguration)) {
 			this.configuration = this.parentObject.defaultConfiguration;
 		} else {
-			this.configuration = Object.assign({}, this.parentObject.defaultConfiguration, userConfiguration);
+			this.configuration = Object.assign({}, this.parentObject.defaultConfiguration, userConfiguration);			
 			this.configuration.options =  Object.assign({}, this.parentObject.defaultConfiguration.options, userConfiguration.options);
 		}
 	}	
@@ -1529,31 +1559,10 @@ function Fuzzy(parentObject) {
 	this.coverageInterval = null;
 	this.fuzzyPartition = this.parentObject.configuration.fuzzyPartition;
 	// Finds the lower and upper bounds
-	var definedBounds = this.fuzzyPartition[0].bounds
-	if (definedBounds.length == 5) {
-		if (definedBounds[0] == null) {
-			var bounds = definedBounds.slice(1,5);
-		} else {
-			var bounds = definedBounds.slice(0,4);
-		}
-	} else {
-		var bounds = definedBounds;
-	}
-
-	this.lowerBound = bounds[0];
-	this.upperBound = bounds[3];
+	this.lowerBound = this.fuzzyPartition[0].bounds[0];
+	this.upperBound = this.fuzzyPartition[0].bounds[3];
 	for (var i=1; i < this.fuzzyPartition.length; i++) {
-		var definedBounds = this.fuzzyPartition[i].bounds
-		if (definedBounds.length == 5) {
-			if (definedBounds[0] == null) {
-				var bounds = definedBounds.slice(1,5);
-			} else {
-				var bounds = definedBounds.slice(0,4);
-			}
-		} else {
-			var bounds = definedBounds;
-		}		
-		
+		var bounds = this.fuzzyPartition[i].bounds				
 		if (bounds[0] < this.lowerBound) {
 			this.lowerBound = bounds[0];
 		}
@@ -1586,8 +1595,6 @@ function Fuzzy(parentObject) {
 
 		// Draws the the membership functions
 		var context = this.canvasFuzzy.getContext("2d");
-		var coeff = this.canvasFuzzy.width/(this.upperBound - this.lowerBound);
-		var heightOffset = 10;
 	
 		if (context !== null) {
 			context.clearRect(0, 0, this.canvasFuzzy.width, this.canvasFuzzy.height);
@@ -1599,28 +1606,18 @@ function Fuzzy(parentObject) {
 				context.beginPath();
 				context.strokeStyle = "rgb(" + this.fuzzyPartition[i].color[0] + "," + this.fuzzyPartition[i].color[1] + "," + this.fuzzyPartition[i].color[2]
 				+ ")";
-				var definedBounds = this.fuzzyPartition[i].bounds
-				if (definedBounds.length == 5) {
-					if (definedBounds[0] == null) {
-						var bounds = definedBounds.slice(1,5);
-					} else {
-						var bounds = definedBounds.slice(0,4);
-					}
-				} else {
-					var bounds = definedBounds;
-				}		
-				console.log(bounds);
-				context.moveTo(coeff*(bounds[0] - this.lowerBound), this.canvasFuzzy.height-20);
-				context.lineTo(coeff*(bounds[1] - this.lowerBound), heightOffset);
-				context.lineTo(coeff*(bounds[2] - this.lowerBound), heightOffset);
-				context.lineTo(coeff*(bounds[3] - this.lowerBound), this.canvasFuzzy.height-20);
+				var bounds = this.fuzzyPartition[i].bounds
+				context.moveTo(this.xCanvas(bounds[0]), this.yCanvas(0));
+				context.lineTo(this.xCanvas(bounds[1]), this.yCanvas(1));
+				context.lineTo(this.xCanvas(bounds[2]), this.yCanvas(1));
+				context.lineTo(this.xCanvas(bounds[3]), this.yCanvas(0));
 				context.stroke();
 				context.closePath();
 			}	
 			context.beginPath();
 			context.strokeStyle = "rgb(0,0,0)";
-			context.moveTo(1, this.canvasFuzzy.height-20);
-			context.lineTo(this.canvasFuzzy.width, this.canvasFuzzy.height-20);
+			context.moveTo(1, this.yCanvas(0));
+			context.lineTo(this.canvasFuzzy.width, this.yCanvas(0));
 			
 			// Draws the bounds values
 			context.font = "bold 14px times";
@@ -1632,27 +1629,39 @@ function Fuzzy(parentObject) {
 			context.stroke();
 			context.closePath();
 			context.restore();
-						
+			
 			// Draws the input
 			if (this.fuzzyInput !== null) {
 				context.save();
 				context.beginPath();
 				context.setLineDash([3, 3]);
-				if (Array.isArray(this.fuzzyInput)) {			
-					context.moveTo(coeff*(this.fuzzyInput[0] - this.lowerBound), this.canvasFuzzy.height-10);
-					context.lineTo(coeff*(this.fuzzyInput[1] - this.lowerBound), heightOffset);
-					context.lineTo(coeff*(this.fuzzyInput[3] - this.lowerBound), this.canvasFuzzy.height-10);
-					context.stroke();
+				if (Array.isArray(this.fuzzyInput)) {
+					if (this.parentObject.configuration.options.impreciseInputDistribution == UNIFORM_DISTRIBUTION) {
+						context.moveTo(this.xCanvas(this.fuzzyInput[0].x), this.yCanvas(this.fuzzyInput[0].y));
+						context.lineTo(this.xCanvas(this.fuzzyInput[1].x), this.yCanvas(this.fuzzyInput[1].y));
+						context.lineTo(this.xCanvas(this.fuzzyInput[2].x), this.yCanvas(this.fuzzyInput[2].y));
+						context.stroke();
+					} else if (this.parentObject.configuration.options.impreciseInputDistribution == NORMAL_DISTRIBUTION) {
+						// Gets the mean and standard deviation [mu-3*sigma, mu, mu, mu+3*sigma]
+						var mean = this.fuzzyInput[1].x;
+						var std = (this.fuzzyInput[2].x - this.fuzzyInput[1].x)/3.0;
+						var multiLinearApproximation = this.getMultiLinearApproximation(mean, std);
+						context.moveTo(this.xCanvas(multiLinearApproximation[0].x), this.yCanvas(multiLinearApproximation[0].y));						
+						for (var i = 1; i < multiLinearApproximation.length; i++) {
+							context.lineTo(this.xCanvas(multiLinearApproximation[i].x), this.yCanvas(multiLinearApproximation[i].y));
+						}
+						context.stroke();
+					}
 					// Draws the coverage interval
 					if (this.coverageInterval !== null) {
 						context.save();
 						context.beginPath();
 						context.setLineDash([3, 1]);
 						context.strokeStyle = "rgb(0, 0, 255)";
-						context.moveTo(coeff*(this.coverageInterval[0] - this.lowerBound), this.canvasFuzzy.height-20);
-						context.lineTo(coeff*(this.coverageInterval[0] - this.lowerBound), heightOffset);
-						context.lineTo(coeff*(this.coverageInterval[1] - this.lowerBound), heightOffset);
-						context.lineTo(coeff*(this.coverageInterval[1] - this.lowerBound), this.canvasFuzzy.height-20);
+						context.moveTo(this.xCanvas(this.coverageInterval[0]), this.yCanvas(0));
+						context.lineTo(this.xCanvas(this.coverageInterval[0]), this.yCanvas(1));
+						context.lineTo(this.xCanvas(this.coverageInterval[1]), this.yCanvas(1));
+						context.lineTo(this.xCanvas(this.coverageInterval[1]), this.yCanvas(0));
 						context.font = "bold 15px Arial";
 						context.textAlign = "center";
 						context.fillText("Level of confidence = " + this.levelOfConfidence.toFixed(2), this.canvasFuzzy.width/2, 15);
@@ -1661,8 +1670,8 @@ function Fuzzy(parentObject) {
 						context.restore();
 					}
 				} else {
-					context.moveTo(coeff*(this.fuzzyInput - this.lowerBound), this.canvasFuzzy.height-20);
-					context.lineTo(coeff*(this.fuzzyInput - this.lowerBound), heightOffset);
+					context.moveTo(this.xCanvas(this.fuzzyInput), this.yCanvas(0));
+					context.lineTo(this.xCanvas(this.fuzzyInput), this.yCanvas(1));
 					context.stroke();
 				}
 				context.closePath();
@@ -1672,8 +1681,24 @@ function Fuzzy(parentObject) {
 	}
 	
 	/**
+	 * Returns the canvas x coordinate
+	 */	
+	this.xCanvas = function (x) {
+		var coeff = this.canvasFuzzy.width/(this.upperBound - this.lowerBound);
+		return coeff * (x - this.lowerBound);
+	}
+	
+	/**
+	 * Returns the canvas y coordinate
+	 */
+	this.yCanvas = function (y) {
+		var heightOffset = 10;
+		var coeff = 4*heightOffset - this.canvasFuzzy.height;
+		return coeff * y + this.canvasFuzzy.height - 2 * heightOffset;
+	}	
+	
+	/**
 	 * Processes the input according to its type
-	 * 
 	 */
 	this.fuzzyInputProcessing = function() {	
 		if (this.parentObject.configuration.options.impreciseInput || this.parentObject.parentObject instanceof BiEmoticon) {
@@ -1694,10 +1719,22 @@ function Fuzzy(parentObject) {
 				var x = (100 - sliderThumbWidth) * this.parentObject.element.value/100 + sliderThumbWidth/2;
 			}
 
-			this.fuzzyInput = [x - sliderThumbWidth/2, x, x, x + sliderThumbWidth/2];
-
+			this.fuzzyInput = [
+				{"x": x - sliderThumbWidth/2, "y": 0},
+				{"x": x, "y": 1},
+				{"x": x + sliderThumbWidth/2, "y": 0}
+			];
+			
+			var fuzzyInput = this.fuzzyInput; 
+			if (this.parentObject.configuration.options.impreciseInputDistribution == NORMAL_DISTRIBUTION) {
+				// Gets the mean and standard deviation [mu-3*sigma, mu, mu, mu+3*sigma]
+				var mean = this.fuzzyInput[1].x;
+				var std = (this.fuzzyInput[2].x - this.fuzzyInput[1].x)/3.0;
+				fuzzyInput = this.getMultiLinearApproximation(mean, std);			
+			}
+			
 			// Fuzzifies the value
-			var xFuzzy = this.fuzzyLowerDescription(this.fuzzyInput, this.parentObject.configuration.fuzzyPartition);	
+			var xFuzzy = this.fuzzyLowerDescription(fuzzyInput, this.parentObject.configuration.fuzzyPartition);	
 
 			// Gets the maximimum grade of membership in the lower description
 			var LowerDescriptionMax = 0;
@@ -1706,7 +1743,17 @@ function Fuzzy(parentObject) {
 			}
 
 			// Cuts the fuzzy input at the level 1 - LowerDescriptionMax
-			var cut = [this.fuzzyInput[1] - sliderThumbWidth * (1 - LowerDescriptionMax) / 2, this.fuzzyInput[1] + sliderThumbWidth * (1 - LowerDescriptionMax) / 2];
+			for (var i=0; i < fuzzyInput.length/2; i++) {
+				var temp = this.intersect (
+						fuzzyInput[0].x, 1 - LowerDescriptionMax, 
+						fuzzyInput[Math.floor(fuzzyInput.length/2)].x, 1 - LowerDescriptionMax,
+						fuzzyInput[i].x, fuzzyInput[i].y,
+						fuzzyInput[i+1].x, fuzzyInput[i+1].y
+				);
+				if (temp != false) {
+					var cut = [temp.x, 2*fuzzyInput[Math.floor(fuzzyInput.length/2)].x - temp.x];
+				}
+			}
 			this.coverageInterval = cut;
 			this.levelOfConfidence = LowerDescriptionMax;		
 			
@@ -1729,10 +1776,13 @@ function Fuzzy(parentObject) {
 				var patternGrade = /(\d+(?:\.\d+)?)/;
 				var gradeOfMembership = result[i].match(patternGrade);
 				var patternLabel = /\/\s*((?:\w|\+|-)+)/
-				var label = result[i].match(patternLabel);
+				var label = result[i].match(patternLabel)[1];
+				if (typeof this.parentObject.configuration.fuzzyPartition[i].alias != 'undefined' && this.parentObject.configuration.fuzzyPartition[i].alias != null) {
+					label = this.parentObject.configuration.fuzzyPartition[i].alias;
+				}				
 				finalResult[i] = {
 					"value": parseFloat(gradeOfMembership[1]),
-					"label": label[1]						
+					"label": label						
 				};
 			}
 
@@ -1751,13 +1801,17 @@ function Fuzzy(parentObject) {
 	 */
 	this.fuzzyDescription = function(x, membershipFunctions) {
 		var result = [];
+		
 		for (i = 0; i < membershipFunctions.length; i++) {
+			var label = membershipFunctions[i].label;
+			if (typeof membershipFunctions[i].alias != 'undefined' && membershipFunctions[i].alias != null) {
+				label = membershipFunctions[i].alias;
+			}
 			result[i] = {
 				"value": this.gradeOfMembership(membershipFunctions[i], x),
-				"label": membershipFunctions[i].label
+				"label": label
 			};
-		}
-		
+		}	
 		return result;
 	}
 
@@ -1768,7 +1822,7 @@ function Fuzzy(parentObject) {
 		var result = [];
 		for (i = 0; i < membershipFunctions.length; i++) {
 			result[i] = {
-				"value": this.gradeOfMembershipTrapezoidalInput(membershipFunctions[i], x),
+				"value": this.gradeOfMembershipFuzzyInput(membershipFunctions[i], x),
 				"label": membershipFunctions[i].label
 			};
 		}
@@ -1777,150 +1831,61 @@ function Fuzzy(parentObject) {
 
 	/**
 	 * Returns the grade of membership for the given membership function and for
-	 * the trapezoidal input x
+	 * the fuzzy input x
 	 */	
-	this.gradeOfMembershipTrapezoidalInput = function(membershipFunction, x) {
-		var g1  = x[0];
-		var mg1 = x[1];
-		var md1 = x[2];
-		var d1  = x[3];
-		var result = 1;
-		var u;
+	this.gradeOfMembershipFuzzyInput = function(membershipFunction, x) {
+		var bounds = membershipFunction.bounds
 		
-		var definedBounds = membershipFunction.bounds
-		if (definedBounds.length == 5) {
-			if (definedBounds[0] == null) {
-				var bounds = definedBounds.slice(1,5);
-			} else {
-				var bounds = definedBounds.slice(0,4);
-			}
-		} else {
-			var bounds = definedBounds;
-		}
-		
-		g2  = bounds[0];
-		mg2 = bounds[1];
-		md2 = bounds[2];
-		d2  = bounds[3];
-
-		// The input is crisp
-		if (g1 == mg1 && g1 == md1 && g1 == d1)
-			return(this.gradeOfMembership(membershipFunction, g1));
-
 		var result = 1.0;
-
-		// + = Inscreasing part
-		// - = Decreasing part
+		var inputKernel = x[ Math.floor(x.length/2)].x;
 
 		// The kernel of the input does not intersect the support of the
 		// meaning : necessity = 0
-		if (mg1 > d2 || md1 < g2) {
+		if (inputKernel > bounds[3] || inputKernel < bounds[0]) {
 			return 0;
 		}
 		
 		// The support of the input is included in the kernel of the meaning
 		// : necessity = 1
-		if (mg2 <= g1 && d1 <= md2) {
+		if (bounds[1] <= x[0].x && x[x.length - 1].x <= bounds[2]) {
 			return 1.0;
 		}
 
-		// Intersection Input+ Meaning+
-		if (mg2 == g2) {
-			if (g1 < mg2 && mg2 <= mg1) {
-				result = Math.min(result, (g2 - mg1) / (mg1 - g1));
+		for (var i = 0; i<x.length-1; i++) {
+			var temp = this.intersect (
+					bounds[0], 0, 
+					bounds[1], 1,
+					x[i].x, 1 - x[i].y,
+					x[i+1].x, 1 - x[i+1].y
+			);
+			if (temp != false) {
+				result = Math.min(result, temp.y);
 			}
-		} else {	    
-			if (mg1 == g1) {
-				u = g1;
-			} else {
-				u = ((mg2 - g2) * mg1 + (mg1 - g1) * g2) / ((mg2 - g2) + (mg1 - g1));
-			}
-			if (g2 <= u && u <= mg2) {
-				result = Math.min(result, (u - g2) / (mg2 - g2));
-			}
-		}
-
-		// Intersection Input+ Meaning-
-		if (md2 == d2) {
-			if (g1 <= md2 && md2 <= mg1) {
-				result = Math.min(result, (d2 - mg1) / (mg1 - g1));
-			}
-		} else {
-			if (mg1 == g1) {
-				u = g1;
-			} else {     
-				u = ((md2 - d2) * mg1 + (mg1 - g1) * d2) / ((md2 - d2) + (mg1 - g1));
-			}
-			if ((md2 - d2) + (mg1 - g1) == 0) { // co-linearity
-				if (g1 == md2 && mg1 == d2) { // Segments are identical
-					return 0;
-				}
-			} else {
-				if (md2 <= u && u <= d2) {
-					result = Math.min(result, (u - d2) / (md2 - d2));
-				}
-			}
-		}
-
-		// Intersection Input- Meaning+
-		if (mg2 == g2) {
-			if (md1 <= mg2 && mg2 <= d1) {
-				result = Math.min(result, (g2 - md1) / (d1 - md1));
-			}
-		} else {
-			if (md1 == d1) {
-				u = d1;
-			} else {
-				u = ((mg2 - g2) * md1 + (md1 - d1) * g2) / ((mg2 - g2) + (md1 - d1));
-			}
-			if ((mg2 - g2) + (md1 - d1) == 0) { // co-linearity
-				if (g2 == md1 && mg2 == d1) {// Segments are identical
-					return 0;
-				}
-			} else {
-				if (g2 <= u && u <= mg2) {
-					result = Math.min(result, (u - g2) / (mg2 - g2));
-				}
-			}
-		}
-
-		// Intersection Input- Meaning-
-		if (md2 == d2) {
-			if (md1 <= md2 && md2 < d1) {
-				result = Math.min(result, (d2 - md1) / (d1 - md1));
-			}
-		} else {
-			if (md1 == d1) {
-				u = d1;
-			} else {
-				u = ((md2 - d2) * md1 + (md1 - d1) * d2) / ((md2 - d2) + (md1 - d1));
-			}
-			if (md2 < u && u <= d2) {
-				result = Math.min(result, (u - d2) / (md2 - d2));
-			}
-		}
-
+			temp = this.intersect (
+					bounds[2], 1, 
+					bounds[3], 0,
+					x[i].x, 1 - x[i].y,
+					x[i+1].x, 1 - x[i+1].y
+			);
+			if (temp != false) {
+				result = Math.min(result, temp.y);
+			}			
+		}		
 		return result;		
-	}
-	
+	}	
+		
 	/**
 	 * Returns the grade of membership for the given membership function as
 	 * point x
 	 */
 	this.gradeOfMembership = function(membershipFunction, x) {
-		var definedBounds = membershipFunction.bounds
-		if (definedBounds.length == 5) {
-			if (definedBounds[0] == null) {
-				var bounds = definedBounds.slice(1,5);
-			} else {
-				var bounds = definedBounds.slice(0,4);
-			}
-		} else {
-			var bounds = definedBounds;
+		var bounds = membershipFunction.bounds;	
+		if (typeof membershipFunction.type==="undefined"){
+			membershipFunction.type = TRAPEZOIDAL_MEMBERSHIP_FUNCTION;
 		}
-		
+
 		if (x < bounds[0]) {
-			if (definedBounds.length == 5 && definedBounds[0]== null) {
+			if (membershipFunction.type == OPEN_LEFT_MEMBERSHIP_FUNCTION) {
 				return 1.0
 			} else{
 				return 0.0
@@ -1934,7 +1899,7 @@ function Fuzzy(parentObject) {
 			return (bounds[3] - x)
 					/ (bounds[3] - bounds[2]);
 		} else {
-			if (definedBounds.length == 5 && definedBounds[4]== null) {
+			if (membershipFunction.type == OPEN_RIGHT_MEMBERSHIP_FUNCTION) {
 				return 1.0
 			} else{
 				return 0.0
@@ -1990,7 +1955,70 @@ function Fuzzy(parentObject) {
 		}
 	}
 
+	/*
+	 * Checks the label
+	 */
 	this.checkLabel = function(object) {
 		return object.label == this.label;
 	}
+
+	/**
+	 * Multilinear approximation of the possibility distribution
+	 * associated with the normal distribution. Approximation error
+	 * is 0.01*std with std the standard deviation of the normal 
+	 * distribution.
+	 */	
+	this.getMultiLinearApproximation = function(mean, std)	{
+		return [
+			{ "x": mean-3.0000*std, "y": 0.0027},			
+			{ "x": mean-2.4154*std, "y": 0.0157},			
+			{ "x": mean-1.9945*std, "y": 0.0461},			
+			{ "x": mean-1.6396*std, "y": 0.1011},			
+			{ "x": mean-1.3233*std, "y": 0.1857},				
+			{ "x": mean-1.0215*std, "y": 0.3070},
+			{ "x": mean-0.7208*std, "y": 0.4710},
+			{ "x": mean-0.4090*std, "y": 0.6825},
+			{ "x": mean, "y": 1.0},
+			{ "x": mean+0.4090*std, "y": 0.6825},
+			{ "x": mean+0.7208*std, "y": 0.4710},
+			{ "x": mean+1.0215*std, "y": 0.3070},				
+			{ "x": mean+1.3233*std, "y": 0.1857},	
+			{ "x": mean+1.6396*std, "y": 0.1011},	
+			{ "x": mean+1.9945*std, "y": 0.0461},	
+			{ "x": mean+2.4154*std, "y": 0.0157},	
+			{ "x": mean+3.0000*std, "y": 0.0027}		
+		];		
+	}
+	
+	// Line intercept math by Paul Bourke http://paulbourke.net/geometry/pointlineplane/
+	// Determine the intersection point of two line segments
+	// Return FALSE if the lines don't intersect
+	this.intersect = function(x1, y1, x2, y2, x3, y3, x4, y4) {
+
+		// Check if none of the lines are of length 0
+		if ((x1 === x2 && y1 === y2) || (x3 === x4 && y3 === y4)) {
+			return false
+		}
+
+		denominator = ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1))
+
+		// Lines are parallel
+		if (denominator === 0) {
+			return false
+		}
+
+		let ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator
+		let ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator
+
+		// is the intersection along the segments
+		if (ua < 0 || ua > 1 || ub < 0 || ub > 1) {
+			return false
+		}
+
+		// Return a object with the x and y coordinates of the intersection
+		let x = x1 + ua * (x2 - x1)
+		let y = y1 + ua * (y2 - y1)
+
+		return {"x":x, "y":y}
+	}	
 }

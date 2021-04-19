@@ -56,15 +56,18 @@
 				new Emoticon("canvas3", "element3"),
 				new Emoticon("canvas4", "element4", {
 					"fuzzyPartition" : [ {
-						"bounds": [ null, 0, 0, 15, 50 ],
+						"type": OPEN_LEFT_MEMBERSHIP_FUNCTION,
+						"bounds": [ 0, 0, 15, 50 ],
 						"color": [ 0, 255, 0 ],
 						"label": "S"
 					}, {
+						"type": TRAPEZOIDAL_MEMBERSHIP_FUNCTION,
 						"bounds": [ 15, 50, 55, 90 ],
 						"color": [ 255, 255, 0 ],
 						"label": "N"
 					}, {
-						"bounds": [ 55, 90, 100, 100, null ],
+						"type": OPEN_RIGHT_MEMBERSHIP_FUNCTION,
+						"bounds": [ 55, 90, 100, 100 ],
 						"color": [ 255, 0, 0 ],
 						"label": "U"
 					} ],

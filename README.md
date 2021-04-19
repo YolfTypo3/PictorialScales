@@ -16,29 +16,46 @@ or to associate them with slide ranges, for example for survey applications.
 
 ### Fuzzy partition
 
-The fuzzy partition is an array of trapezoidal membership functions. Each membership function is defined by its bounds [a, b, c, d], a color and a label. 
+The fuzzy partition is an array of trapezoidal membership functions. Each membership function is defined by its type, bounds [a, b, c, d], color and label. 
 
-- "a" is the point below which the left hand side of the trapezoidal membership function is equal to 0.
+The type is a constant:
+- OPEN\_LEFT\_MEMBERSHIP\_FUNCTION for S-type membership function going to -infinity. 
+- OPEN\_RIGHT\_MEMBERSHIP\_FUNCTION for S-type membership function going to +infinity.
+- TRAPEZOIDAL\_MEMBERSHIP\_FUNCTION for trapezoidal membership function. This is the default type and it can be omitted.
+
+For trapezoidal membershipfunctions, the bounds are defined by [a, b, c, d] where:
+- "a" is the point below which the left hand side of the trapezoidal membership function is equal to 0 . 
 - "b" is the point where the left hand side of the trapezoidal membership function is equal to 1, i.e. the membership function is linearly increasing from 0 to 1 between "a" and "b".
 - "c" is the point such that between "b" and "c" the membership function is equal to 1.
 - "d" is the point above which the right hand side of the trapezoidal membership function is equal to 0, i.e. the membership function is linearly decreasing from 1 to 0 between "c" and "d".
 
-For the lower and upper membership functions, S-type curves are often used. S-type means that either "a" for the lower memberhip function or "d" for the upper one goes respectively to -infinity or +infinity. For these special cases the bounds must be defined as [null, a, b, c, d] for the lower membership function and a, b, c, d, null] for the upper one. The values "a" and "d" will be used for the axis.
+For S-type open left membership functions, the bounds are [a, a, b, c] where  
+- "a" defines the lower bound for the display. 
+- "b" is the point is the point below which the membership function is equal to 1.
+- "c" is the point above which the membership function is equal to 0, i.e. the membership function is linearly decreasing from 1 to 0 between "b" and "c".
+
+For S-type open rightt curve, the bounds are [a, b, c, c] where  
+- "a" is the point below which the membership function is equal to 0 
+- "b" is the point is the point below which the membership function is equal to 1, i.e. the membership function is linearly increasing from 0 to 1 between "a" and "b".
+- "c" defines the upper bound for the display.
 
 Example: modification of the default partition for Emoticon.
 
 ```
 var x = new Emoticon("canvas4", "slider4", {
 					"fuzzyPartition" : [ {
-						"bounds" : [ null, 0, 0, 15, 50 ],
+						"type" : OPEN_LEFT_MEMBERSHIP_FUNCTION,
+						"bounds" : [ 0, 0, 15, 50 ],
 						"color" : [ 0, 255, 0 ],
 						"label" : "S"
 					}, {
+						"type" : TRAPEZOIDAL_MEMBERSHIP_FUNCTION,
 						"bounds" : [ 15, 50, 55, 90 ],
 						"color" : [ 255, 255, 0 ],
 						"label" : "N"
 					}, {
-						"bounds" : [ 55, 90, 100, 100, null ],
+						"type" : OPEN_LEFT_MEMBERSHIP_FUNCTION,
+						"bounds" : [ 55, 90, 100, 100 ],
 						"color" : [ 255, 0, 0 ],
 						"label" : "U"
 					} ]
@@ -162,6 +179,14 @@ Note : since labels may contain + or - signs, each part of the fuzzy input must 
 - canvasFuzzyHeight (default 150): height of the canvas used to display the fuzzy partition.
 - canvasFuzzyWidth (default 400): width of the canvas used to display the fuzzy partition.	
 - sliderThumbWidth (default 10): width of the slider thumb.
+- impreciseInputDistribution (default UNIFORM_DISTRIBUTION): this parameter defines the probability distribution
+associated with the imprecise input. If set to UNIFORM_DISTRIBUTION, the transformation of the probability
+distribution into a possibility distribution gives a triangular fuzzy input centered on the middle point of the 
+slider thumb. The width of the slider thumb is the support of the distribution. If set to NORMAL_DISTRIBUTION,
+the possibility distribution is the transformation of the normal distribution using a multilinear approximation. The possibility distribution is centered on the middle point of the slider thumb. The width of the slider thumb
+is the standard deviation of the normal distribution. Instead of using a HTML range item, the middle point or the 
+support (or standard deviation) can be provided by text input (see the third example of the bi-emoticons).
+ 
 
 #### Options for Sun/Cloud
 

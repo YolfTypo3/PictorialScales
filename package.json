@@ -1,6 +1,6 @@
 {
   "name": "PictorialScales",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "JavaScript to build pictorial scales associated with HTML elements.",
   "main": "PictorialScales.js",
   "scripts": {

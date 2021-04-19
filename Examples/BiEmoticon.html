@@ -33,20 +33,30 @@
 
 	<div class="container">
 		
-		<h2>Bi-emoticon from a range slider input</h2>
+		<h2>Bi-emoticon from a range slider input with a triangular possibility distribution associated with the uniform distribution</h2>
 		<input id="element1" type="range" min="0" max="100" value="50" class="slider">
 		<canvas id="canvas1" width="150" height="150"></canvas>		
-		
+		<h2>Bi-emoticon from a range slider input with a possibility distribution associated with the normal distribution</h2>
+		<input id="element2" type="range" min="0" max="100" value="50" class="slider">
+		<canvas id="canvas2" width="150" height="150"></canvas>	
+		<h2>Bi-emoticon from inputs of the middle point and the support or standard deviation </h2>
+		<input id="value3" type="text" value="50">	
+		<input id="support3" type="text" value="10">	
+		<select id="type3" onchange="location.reload()">
+  			<option value="0">Uniform distribution</option>
+  			<option value="1">Normal distribution</option>
+		</select>					
+		<canvas id="canvas3" width="150" height="150"></canvas>					
 		<h2>Bi-emoticon from a range slider input with reverse color scale
 			and graduality on the eyes opening and eyebrows (pain scale)</h2>
-		<input id="element2" type="range" min="0" max="100" value="75"
+		<input id="element4" type="range" min="0" max="100" value="75"
 			class="slider">	
-		<canvas id="canvas2" width="150" height="150"></canvas>	
+		<canvas id="canvas4" width="150" height="150"></canvas>	
 		<h2>Bi-emoticon from a range slider input with a progressive gradient on color
 			and graduality on eyes, eyebrows and mouth opening (fear scale)</h2>		
-		<input id="element3" type="range" min="0" max="100" value="75"
+		<input id="element5" type="range" min="0" max="100" value="75"
 			class="slider">
-		<canvas id="canvas3" width="150" height="150"></canvas>														
+		<canvas id="canvas5" width="150" height="150"></canvas>														
 	</div>
 
 				
@@ -54,92 +64,105 @@
 	<script>
 
 		var scales = [
-			new BiEmoticon("canvas1", "element1"),	
+			new BiEmoticon("canvas1", "element1"),
 			new BiEmoticon("canvas2", "element2", {
-				"fuzzyPartition" : [ {
-					"bounds" : [ null, 0, 0, 15, 50 ],
-					"color" : [ 0, 255, 0 ],
-					"label" : "S"
+				"options": {
+					"impreciseInputDistribution": NORMAL_DISTRIBUTION
+				}
+			}),
+			new BiEmoticon("canvas3", ["value3", "support3"], {
+				"options": {
+					"impreciseInputDistribution": document.getElementById("type3").value
+				}
+			}),			
+			new BiEmoticon("canvas4", "element4", {
+				"fuzzyPartition": [ {
+					"type": OPEN_LEFT_MEMBERSHIP_FUNCTION,
+					"bounds": [ 0, 0, 15, 50 ],
+					"color": [ 0, 255, 0 ],
+					"label": "S"
 				}, {
-					"bounds" : [ 15, 50, 55, 90 ],
-					"color" : [ 255, 255, 0 ],
-					"label" : "N"
+					"type": TRAPEZOIDAL_MEMBERSHIP_FUNCTION,
+					"bounds": [ 15, 50, 55, 90 ],
+					"color": [ 255, 255, 0 ],
+					"label": "N"
 				}, {
-					"bounds" : [ 55, 90, 100, 100, null ],
-					"color" : [ 255, 0, 0 ],
-					"label" : "U"
+					"type": OPEN_RIGHT_MEMBERSHIP_FUNCTION,
+					"bounds": [ 55, 90, 100, 100 ],
+					"color": [ 255, 0, 0 ],
+					"label": "U"
 				} ],
 				"eyesSizePrototypes" : [ {
-					"label" : "U",
-					"prototype" : 0.3
+					"label": "U",
+					"prototype": 0.3
 				}, {
-					"label" : "N",
-					"prototype" : 0.9
+					"label": "N",
+					"prototype": 0.9
 				}, {
-					"label" : "S",
-					"prototype" : 1
+					"label": "S",
+					"prototype": 1
 				} ],
 				"eyebrowsPrototypes" : [ {
-					"label" : "U",
-					"prototype" : 0.2
+					"label": "U",
+					"prototype": 0.2
 				}, {
-					"label" : "N",
-					"prototype" : 0.33
+					"label": "N",
+					"prototype": 0.33
 				}, {
-					"label" : "S",
-					"prototype" : 0.35
+					"label": "S",
+					"prototype": 0.35
 				} ],					
-				"options" : {
-					"eyebrows" : true,
+				"options": {
+					"eyebrows": true,
 					"leftEyeBrowRightYPositionToSizeRatio": 0.28,
-				}					
+				}		
 			}),
-			new BiEmoticon("canvas3", "element3",{				
-				"colorPrototypes" : [ {
-					"label" : "U",
-					"prototype" : [ 255, 255, 0 ]
+			new BiEmoticon("canvas5", "element5",{				
+				"colorPrototypes": [ {
+					"label": "U",
+					"prototype": [ 255, 255, 0 ]
 				}, {
-					"label" : "N",
-					"prototype" : [ 255, 255, 0 ]
+					"label": "N",
+					"prototype": [ 255, 255, 0 ]
 				}, {
-					"label" : "S",
-					"prototype" : [ 255, 255, 0 ]
+					"label": "S",
+					"prototype": [ 255, 255, 0 ]
 				} ],
-				"smilePrototypes" : [ {
-					"label" : "U",
+				"smilePrototypes": [ {
+					"label": "U",
 					"prototype" : 0
 				}, {
-					"label" : "N",
+					"label": "N",
 					"prototype" : -0.25
 				}, {
-					"label" : "S",
+					"label": "S",
 					"prototype" : -0.4
 				} ],
-				"secondSmilePrototypes" : [ {
-					"label" : "U",
-					"prototype" : 0
+				"secondSmilePrototypes": [ {
+					"label": "U",
+					"prototype": 0
 				}, {
-					"label" : "N",
-					"prototype" : 0.1
+					"label": "N",
+					"prototype": 0.1
 				}, {
-					"label" : "S",
-					"prototype" : 0.25
+					"label": "S",
+					"prototype": 0.25
 				} ],						
-				"eyesSizePrototypes" : [ {
-					"label" : "U",
-					"prototype" : 0.97
+				"eyesSizePrototypes": [ {
+					"label": "U",
+					"prototype": 0.97
 				}, {
-					"label" : "N",
-					"prototype" : 1.0
+					"label": "N",
+					"prototype": 1.0
 				}, {
-					"label" : "S",
-					"prototype" : 1.07
+					"label": "S",
+					"prototype": 1.07
 				} ],						
-				"options" : {
-					"gradient" : true,
-					"secondSmile" : true,	
+				"options": {
+					"gradient": true,
+					"secondSmile": true,	
 					"mouthLengthToSizeRatio": 0.45,
-					"eyesSizeScaled" : true,
+					"eyesSizeScaled": true,
 					"eyebrows" : true
 				}
 		})			
